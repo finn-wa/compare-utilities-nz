@@ -1,1 +1,1 @@
-# electricity-usage
+# compare-utilities-nz

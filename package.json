@@ -1,5 +1,5 @@
 {
-  "name": "electricity-usage",
+  "name": "compare-utilities-nz",
   "type": "module",
   "packageManager": "yarn@4.2.2",
   "devDependencies": {
