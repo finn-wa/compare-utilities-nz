@@ -1,0 +1,12 @@
+{
+  "name": "electricity-usage",
+  "type": "module",
+  "packageManager": "yarn@4.2.2",
+  "devDependencies": {
+    "@types/node": "20",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "temporal-polyfill": "^0.2.5"
+  }
+}
