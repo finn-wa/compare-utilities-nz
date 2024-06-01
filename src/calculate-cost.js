@@ -30,31 +30,25 @@ export function toTemporalUsageEntries(usageEntries) {
 }
 
 /**
- * Returns the number of days covered by the usage entries.
- *
- * @param {import("./parse-data.js").IntervalType} intervalType
- * @param {TemporalUsageEntry[]} usage entries in chronological order
+ * Returns the rate with the lowest millicent value.
+ * @param {import("./plans/types.js").Rate[]} rates a non-empty array of rates
+ * @returns {import("./plans/types.js").Rate} the best rate
  */
-function getTotalDays(intervalType, usage) {
-  const startDate = usage.at(0)?.startDate;
-  const endDate = usage.at(-1)?.startDate;
-  if (startDate == null || endDate == null) {
-    throw new Error("At least one usage entry is required");
+function getBestRate(rates) {
+  if (rates.length === 1) {
+    return rates[0];
   }
-  /** @type {Temporal.Duration} */
-  let intervalDuration;
-  if (intervalType === "hourly") {
-    intervalDuration = Temporal.Duration.from({ hours: 1 });
-  } else if (intervalType === "daily") {
-    intervalDuration = Temporal.Duration.from({ days: 1 });
-  } else if (intervalType === "monthly") {
-    intervalDuration = Temporal.Duration.from({ months: 1 });
-  } else {
-    throw new Error(`Unsupported intervalType: "${intervalType}"`);
+  /** @type {(import("./plans/types.js").Rate | null)} */
+  let bestRate = null;
+  for (const rate of rates) {
+    if (bestRate === null || rate.millicents < bestRate.millicents) {
+      bestRate = rate;
+    }
   }
-  const days = startDate.until(endDate).add(intervalDuration).total("days");
-  console.log(`Usage entries span ${days} days`);
-  return days;
+  if (bestRate === null) {
+    throw new Error("Received an empty array of rates!");
+  }
+  return bestRate;
 }
 
 /**
@@ -72,17 +66,20 @@ export function calculateHourlyUsageEntryCost(entry, plan) {
       rate.hours.some(({ start, end }) => start <= hour && hour < end)
     );
   });
-  if (applicableRates.length !== 1) {
-    let errorMsg = `(Plan: ${plan.id}) There must only be one applicable rate, but ${applicableRates.length} were found for entry with start date ${entry.startDate}`;
-    if (applicableRates.length > 1) {
-      const rateNames = applicableRates
+  // Make sure that there aren't any overlapping non-special rates
+  const nonSpecialRates = applicableRates.filter((rate) => !rate.special);
+  if (nonSpecialRates.length !== 1) {
+    let errorMsg = `(Plan: ${plan.id}) There must only be one applicable rate, but ${nonSpecialRates.length} were found for entry with start date ${entry.startDate}`;
+    if (nonSpecialRates.length > 1) {
+      const rateNames = nonSpecialRates
         .map((rate) => rate.name ?? "unnamed")
         .join(", ");
       errorMsg += `: (${rateNames})`;
     }
     throw new Error(errorMsg);
   }
-  const variableCost = Math.round(applicableRates[0].millicents * entry.usage);
+  const bestRate = getBestRate(applicableRates);
+  const variableCost = Math.round(bestRate.millicents * entry.usage);
   const fixedCost = plan.dailyMillicents / entry.startDate.hoursInDay;
   return variableCost + fixedCost;
 }

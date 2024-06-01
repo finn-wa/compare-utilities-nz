@@ -1,5 +1,42 @@
 import { daily, weekdays, weekends } from "../utils.js";
 
+const moveMasterPeak = {
+  name: "Peak",
+  days: weekdays,
+  hours: [
+    { start: 7, end: 9 },
+    { start: 17, end: 21 },
+  ],
+};
+const moveMasterShoulderWeekdays = {
+  name: "Off-peak shoulder (weekdays)",
+  days: weekdays,
+  hours: [
+    { start: 9, end: 17 },
+    { start: 21, end: 23 },
+  ],
+};
+const moveMasterShoulderWeekends = {
+  name: "Off-peak shoulder (weekends)",
+  days: weekends,
+  hours: [{ start: 7, end: 23 }],
+};
+const moveMasterOffPeak = {
+  name: "Off-peak night",
+  days: daily,
+  hours: [
+    { start: 23, end: 24 },
+    { start: 0, end: 7 },
+  ],
+};
+const hourOfPower = {
+  name: "Hour of Power",
+  days: daily,
+  hours: [{ start: 21, end: 22 }],
+  millicents: 0,
+  special: true,
+};
+
 /** @type {import("../types.js").ElectricityPlan} */
 export const electricKiwiMoveMasterLowUser = {
   id: "electricKiwiMoveMasterLowUser",
@@ -10,45 +47,22 @@ export const electricKiwiMoveMasterLowUser = {
   dailyMillicents: 69000,
   rates: [
     {
-      name: "Peak",
-      days: weekdays,
-      hours: [
-        { start: 7, end: 9 },
-        { start: 17, end: 21 },
-      ],
+      ...moveMasterPeak,
       millicents: 45500,
     },
     {
-      name: "Off-peak shoulder (weekdays)",
-      days: weekdays,
-      hours: [
-        { start: 9, end: 17 },
-        { start: 21, end: 23 },
-      ],
+      ...moveMasterShoulderWeekdays,
       millicents: 31850,
     },
     {
-      name: "Off-peak shoulder (weekends)",
-      days: weekends,
-      hours: [{ start: 7, end: 23 }],
+      ...moveMasterShoulderWeekends,
       millicents: 31850,
     },
     {
-      name: "Off-peak night",
-      days: daily,
-      hours: [
-        { start: 23, end: 24 },
-        { start: 0, end: 7 },
-      ],
+      ...moveMasterOffPeak,
       millicents: 22750,
     },
-    {
-      name: "Hour of Power",
-      days: daily,
-      hours: [{ start: 21, end: 22 }],
-      millicents: 0,
-      special: true,
-    },
+    hourOfPower,
   ],
 };
 
@@ -62,37 +76,21 @@ export const electricKiwiMoveMasterStandardUser = {
   dailyMillicents: 254_000,
   rates: [
     {
-      name: "Peak",
-      days: weekdays,
-      hours: [
-        { start: 7, end: 9 },
-        { start: 17, end: 21 },
-      ],
+      ...moveMasterPeak,
       millicents: 32_520,
     },
     {
-      name: "Off-peak shoulder (weekdays)",
-      days: weekdays,
-      hours: [
-        { start: 9, end: 17 },
-        { start: 21, end: 23 },
-      ],
+      ...moveMasterShoulderWeekdays,
       millicents: 22_770,
     },
     {
-      name: "Off-peak shoulder (weekends)",
-      days: weekends,
-      hours: [{ start: 7, end: 23 }],
+      ...moveMasterShoulderWeekends,
       millicents: 22_770,
     },
     {
-      name: "Off-peak night",
-      days: daily,
-      hours: [
-        { start: 23, end: 24 },
-        { start: 0, end: 7 },
-      ],
+      ...moveMasterOffPeak,
       millicents: 16_260,
     },
+    hourOfPower,
   ],
 };

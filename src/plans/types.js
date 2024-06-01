@@ -43,7 +43,6 @@
  * @property {ServiceType[]} bundle Required bundled services (may be empty)
  * @property {string} [variant] Optional variant (e.g. "Low User")
  */
-
 /**
  * @typedef {('electricity'|'gas'|'internet')} ServiceType
  */
