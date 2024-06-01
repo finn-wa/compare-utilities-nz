@@ -8,12 +8,22 @@ import {
   frankLowUser,
   frankStandardUser,
 } from "./providers/frank.js";
+import {
+  mercuryFixedTermLowUse,
+  mercuryFixedTermStandardUse,
+  mercuryOpenTermLowUse,
+  mercuryOpenTermStandardUse,
+} from "./providers/mercury.js";
 
 export const ElectricityPlan = {
   electricKiwiMoveMasterLowUser,
   electricKiwiMoveMasterStandardUser,
   frankLowUser,
   frankStandardUser,
+  mercuryOpenTermLowUse,
+  mercuryFixedTermLowUse,
+  mercuryOpenTermStandardUse,
+  mercuryFixedTermStandardUse,
 };
 
 /** @type {import("./types.js").ElectricityPlan[]}} */
