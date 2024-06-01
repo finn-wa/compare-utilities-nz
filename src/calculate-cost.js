@@ -58,8 +58,8 @@ function getTotalDays(intervalType, usage) {
 }
 
 /**
+ * @param {import("./plans/types.js").ElectricityPlan} plan
  * @param {TemporalUsageEntry} entry
- * @param {import("./plans.js").ElectricityPlan} plan
  * @returns {number} cost in millicents
  */
 export function calculateHourlyUsageEntryCost(entry, plan) {
@@ -82,35 +82,15 @@ export function calculateHourlyUsageEntryCost(entry, plan) {
     }
     throw new Error(errorMsg);
   }
-  return Math.round(applicableRates[0].millicents * entry.usage);
+  const variableCost = Math.round(applicableRates[0].millicents * entry.usage);
+  const fixedCost = plan.dailyMillicents / entry.startDate.hoursInDay;
+  return variableCost + fixedCost;
 }
 
 /**
- * Formats millicents as dollars.
- * @param {number} mc
- * @returns {string} dollar value as a string
- */
-function mcTo$(mc) {
-  return (mc / 100_000).toFixed(2);
-}
-
-/**
- * @param {import("./plans.js").ElectricityPlan} plan
- * @returns {string}
- */
-function formatPlanName(plan) {
-  const name = `${plan.provider}: ${plan.name}`;
-  if (plan.variant != null) {
-    return `${name} (${plan.variant})`;
-  }
-  return name;
-}
-
-/**
- *
  * @param {import("./parse-data.js").IntervalType} intervalType
  * @param {TemporalUsageEntry[]} usage
- * @param {import("./plans.js").ElectricityPlan} plan
+ * @param {import("./plans/types.js").ElectricityPlan} plan
  */
 export function calculateCost(intervalType, usage, plan) {
   if (intervalType !== "hourly") {
@@ -118,18 +98,9 @@ export function calculateCost(intervalType, usage, plan) {
       `Unsupported intervalType: "${intervalType}" (must be "hourly")`
     );
   }
-  const days = getTotalDays(intervalType, usage);
-  const fixedCost = days * plan.dailyMillicents;
-  const variableCost = usage.reduce(
+  const cost = usage.reduce(
     (acc, entry) => acc + calculateHourlyUsageEntryCost(entry, plan),
     0
   );
-  const totalCost = fixedCost + variableCost;
-  console.log(
-    `${formatPlanName(plan)}
- - Fixed: $${mcTo$(fixedCost)}
- - Variable: $${mcTo$(variableCost)}
- - Total: $${mcTo$(totalCost)}`
-  );
-  return totalCost;
+  return cost;
 }
