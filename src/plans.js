@@ -20,9 +20,6 @@
  * @property {string} [name] Optional name for this rate
  */
 /**
- * @typedef {('electricity'|'gas'|'internet')} ServiceType
- */
-/**
  * An electricity plan
  * @typedef {Object} ElectricityPlan
  * @property {string} id unique identifier for the plan
@@ -42,15 +39,8 @@
  * @property {number} kwhMillicents Cost per kwH in millicents
  * @property {number} dailyMillicents Fixed cost in millicents
  * @property {ServiceType[]} bundle Required bundled services (may be empty)
- * @property {string} [variant] Optional variant (e.g. "Low User") */
-
-/**
- * @param {number} mc
- * @returns {number} dollar value
+ * @property {string} [variant] Optional variant (e.g. "Low User")
  */
-function millicentsToDollars(mc) {
-  return mc * 100_000;
-}
 
 /** @type {Day[]} */
 const weekdays = [1, 2, 3, 4, 5];
@@ -59,7 +49,7 @@ const weekends = [6, 7];
 /** @type {Day[]} */
 const daily = [1, 2, 3, 4, 5, 6, 7];
 /** @type {HourInterval[]} */
-const allDay = [{ start: 0, end: 23 }];
+const allDay = [{ start: 0, end: 24 }];
 
 /**
  * Returns an array containing a single rate that applies all day, every day of
@@ -72,9 +62,19 @@ function dailyRate(millicents) {
   return [{ days: daily, hours: allDay, millicents }];
 }
 
-/** @type {ElectricityPlan[]}} */
-export const electricityPlans = [
-  {
+/**
+ * @typedef {('electricity'|'gas'|'internet')} ServiceType
+ */
+// Awkward workaround for lack of "as const" or type-casting in jsdocs
+/** @type {'electricity'} */
+const electricity = "electricity";
+/** @type {'gas'} */
+const gas = "gas";
+/** @type {'internet'} */
+const internet = "internet";
+
+export const ElectricityPlan = {
+  electricKiwiMoveMasterLowUser: {
     id: "electricKiwiMoveMasterLowUser",
     provider: "Electric Kiwi",
     name: "MoveMaster",
@@ -117,7 +117,7 @@ export const electricityPlans = [
       },
     ],
   },
-  {
+  electricKiwiMoveMasterStandardUser: {
     id: "electricKiwiMoveMasterStandardUser",
     provider: "Electric Kiwi",
     name: "MoveMaster",
@@ -160,7 +160,7 @@ export const electricityPlans = [
       },
     ],
   },
-  {
+  frankLowUser: {
     id: "frankLowUser",
     provider: "Frank",
     name: "Electricity",
@@ -169,7 +169,7 @@ export const electricityPlans = [
     bundle: [],
     rates: dailyRate(26_220),
   },
-  {
+  frankStandardUser: {
     id: "frankStandardUser",
     provider: "Frank",
     name: "Electricity",
@@ -178,20 +178,22 @@ export const electricityPlans = [
     bundle: [],
     rates: dailyRate(22_310),
   },
-];
+};
 
-/** @type {PipedGasPlan[]} */
-export const gasPlans = [
-  {
+/** @type {ElectricityPlan[]}} */
+export const ElectricityPlans = Object.values(ElectricityPlan);
+
+export const GasPlan = {
+  frankGasBundled: {
     id: "frankGasBundled",
     provider: "Frank",
     name: "Piped Gas",
     variant: "(with electricity)",
     dailyMillicents: 184_000,
     kwhMillicents: 8_970,
-    bundle: ["electricity"],
+    bundle: [electricity],
   },
-  {
+  frankGasUnbundled: {
     id: "frankGasUnbundled",
     provider: "Frank",
     name: "Piped Gas",
@@ -200,4 +202,7 @@ export const gasPlans = [
     kwhMillicents: 8_970,
     bundle: [],
   },
-];
+};
+
+/** @type {PipedGasPlan[]} */
+export const GasPlans = Object.values(GasPlan);
