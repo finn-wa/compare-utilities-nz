@@ -9,10 +9,16 @@ import {
   frankStandardUser,
 } from "./providers/frank.js";
 import {
-  mercuryFixedTermLowUse,
-  mercuryFixedTermStandardUse,
-  mercuryOpenTermLowUse,
-  mercuryOpenTermStandardUse,
+  genesisEnergyPlusLowUserElectricity,
+  genesisEnergyPlusLowUserGas,
+  genesisEnergyPlusStandardUserElectricity,
+  genesisEnergyPlusStandardUserGas,
+} from "./providers/genesis.js";
+import {
+  mercuryOpenTermLowUseElectricity,
+  mercuryOpenTermLowUseGas,
+  mercuryOpenTermStandardUseElectricity,
+  mercuryOpenTermStandardUseGas,
 } from "./providers/mercury.js";
 
 export const ElectricityPlan = {
@@ -20,10 +26,10 @@ export const ElectricityPlan = {
   electricKiwiMoveMasterStandardUser,
   frankLowUser,
   frankStandardUser,
-  mercuryOpenTermLowUse,
-  mercuryFixedTermLowUse,
-  mercuryOpenTermStandardUse,
-  mercuryFixedTermStandardUse,
+  mercuryOpenTermLowUseElectricity,
+  mercuryOpenTermStandardUseElectricity,
+  genesisEnergyPlusLowUserElectricity,
+  genesisEnergyPlusStandardUserElectricity,
 };
 
 /** @type {import("./types.js").ElectricityPlan[]}} */
@@ -32,6 +38,10 @@ export const ElectricityPlans = Object.values(ElectricityPlan);
 export const GasPlan = {
   frankGasBundled,
   frankGasUnbundled,
+  genesisEnergyPlusLowUserGas,
+  genesisEnergyPlusStandardUserGas,
+  mercuryOpenTermLowUseGas,
+  mercuryOpenTermStandardUseGas,
 };
 
 /** @type {import("./types.js").PipedGasPlan[]} */
