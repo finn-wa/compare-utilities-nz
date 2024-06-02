@@ -2,7 +2,7 @@ import assert from "node:assert";
 import test, { describe } from "node:test";
 import { Temporal } from "temporal-polyfill";
 import { calculateHourlyUsageEntryCost } from "./calculate-cost.js";
-import { ElectricityPlan } from "./plans.js";
+import { ElectricityPlan } from "./plans/index.js";
 
 const usageWithCostFrank = {
   intervalType: "hourly",

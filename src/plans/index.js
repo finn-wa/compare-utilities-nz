@@ -1,4 +1,11 @@
 import {
+  contactGoodNightsLowUserElectricity,
+  contactGoodNightsStandardUserElectricity,
+  contactGoodWeekendsLowUserElectricity,
+  contactGoodWeekendsStandardUserElectricity,
+  contactLivingSmartGas,
+} from "./providers/contact.js";
+import {
   electricKiwiMoveMasterLowUser,
   electricKiwiMoveMasterStandardUser,
 } from "./providers/electric-kiwi.js";
@@ -17,6 +24,7 @@ import {
 import {
   mercuryOpenTermLowUseElectricity,
   mercuryOpenTermLowUseGas,
+  mercuryOpenTermLowUseGasUnbundled,
   mercuryOpenTermStandardUseElectricity,
   mercuryOpenTermStandardUseGas,
 } from "./providers/mercury.js";
@@ -30,6 +38,10 @@ export const ElectricityPlan = {
   mercuryOpenTermStandardUseElectricity,
   genesisEnergyPlusLowUserElectricity,
   genesisEnergyPlusStandardUserElectricity,
+  contactGoodNightsLowUserElectricity,
+  contactGoodNightsStandardUserElectricity,
+  contactGoodWeekendsLowUserElectricity,
+  contactGoodWeekendsStandardUserElectricity,
 };
 
 /** @type {import("./types.js").ElectricityPlan[]}} */
@@ -42,6 +54,8 @@ export const GasPlan = {
   genesisEnergyPlusStandardUserGas,
   mercuryOpenTermLowUseGas,
   mercuryOpenTermStandardUseGas,
+  mercuryOpenTermLowUseGasUnbundled,
+  contactLivingSmartGas,
 };
 
 /** @type {import("./types.js").PipedGasPlan[]} */

@@ -8,7 +8,7 @@ export const frankLowUser = {
   variant: "Low User",
   dailyMillicents: 69_000,
   bundle: [],
-  rates: dailyRate(26_220),
+  rates: [dailyRate(26_220)],
 };
 
 /** @type {import("../types.js").ElectricityPlan} */
@@ -19,7 +19,7 @@ export const frankStandardUser = {
   variant: "Standard User",
   dailyMillicents: 155_250,
   bundle: [],
-  rates: dailyRate(22_310),
+  rates: [dailyRate(22_310)],
 };
 
 /** @type {import("../types.js").PipedGasPlan} */

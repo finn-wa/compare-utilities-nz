@@ -26,7 +26,7 @@ export const genesisEnergyPlusStandardUserElectricity = {
   name: "Electricity - Energy Plus",
   variant: "Standard User",
   dailyMillicents: discount.unbundled(260_980),
-  rates: dailyRate(discount.unbundled(22_440)),
+  rates: [dailyRate(discount.unbundled(22_440))],
   bundle: [],
 };
 
@@ -37,7 +37,7 @@ export const genesisEnergyPlusStandardUserElectricityBundled = {
   name: "Electricity - Energy Plus Bundle",
   variant: "Standard User",
   dailyMillicents: discount.bundled(260_980),
-  rates: dailyRate(discount.bundled(22_440)),
+  rates: [dailyRate(discount.bundled(22_440))],
   bundle: ["gas"],
 };
 
@@ -72,7 +72,7 @@ export const genesisEnergyPlusLowUserElectricity = {
   name: "Electricity - Energy Plus",
   variant: "Low User",
   dailyMillicents: discount.unbundled(103_500),
-  rates: dailyRate(discount.unbundled(29_580)),
+  rates: [dailyRate(discount.unbundled(29_580))],
   bundle: [],
 };
 
@@ -83,7 +83,7 @@ export const genesisEnergyPlusLowUserElectricityBundled = {
   name: "Electricity - Energy Plus Bundle",
   variant: "Low User",
   dailyMillicents: discount.bundled(103_500),
-  rates: dailyRate(discount.bundled(29_580)),
+  rates: [dailyRate(discount.bundled(29_580))],
   bundle: ["gas"],
 };
 

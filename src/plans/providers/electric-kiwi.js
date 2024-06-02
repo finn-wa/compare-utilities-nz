@@ -1,38 +1,31 @@
-import { daily, weekdays, weekends } from "../utils.js";
+import { daily, hours, weekdays, weekends } from "../utils.js";
+
+const provider = "Electric Kiwi";
 
 const moveMasterPeak = {
   name: "Peak",
   days: weekdays,
-  hours: [
-    { start: 7, end: 9 },
-    { start: 17, end: 21 },
-  ],
+  hours: [hours(7, 9), hours(17, 21)],
 };
 const moveMasterShoulderWeekdays = {
   name: "Off-peak shoulder (weekdays)",
   days: weekdays,
-  hours: [
-    { start: 9, end: 17 },
-    { start: 21, end: 23 },
-  ],
+  hours: [hours(9, 17), hours(21, 23)],
 };
 const moveMasterShoulderWeekends = {
   name: "Off-peak shoulder (weekends)",
   days: weekends,
-  hours: [{ start: 7, end: 23 }],
+  hours: [hours(7, 23)],
 };
 const moveMasterOffPeak = {
   name: "Off-peak night",
   days: daily,
-  hours: [
-    { start: 23, end: 24 },
-    { start: 0, end: 7 },
-  ],
+  hours: [hours(23, 24), hours(0, 7)],
 };
 const hourOfPower = {
   name: "Hour of Power",
   days: daily,
-  hours: [{ start: 21, end: 22 }],
+  hours: [hours(21, 22)],
   millicents: 0,
   special: true,
 };
@@ -40,7 +33,7 @@ const hourOfPower = {
 /** @type {import("../types.js").ElectricityPlan} */
 export const electricKiwiMoveMasterLowUser = {
   id: "electricKiwiMoveMasterLowUser",
-  provider: "Electric Kiwi",
+  provider,
   name: "MoveMaster",
   variant: "Low User",
   bundle: [],
@@ -69,7 +62,7 @@ export const electricKiwiMoveMasterLowUser = {
 /** @type {import("../types.js").ElectricityPlan} */
 export const electricKiwiMoveMasterStandardUser = {
   id: "electricKiwiMoveMasterStandardUser",
-  provider: "Electric Kiwi",
+  provider,
   name: "MoveMaster",
   variant: "Standard User",
   bundle: [],
