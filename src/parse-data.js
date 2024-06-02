@@ -1,51 +1,94 @@
 import { readFileSync, readdirSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const inputFolder = "./data/input";
+const electricityInputFolder = "./data/electricity";
+const gasInputFolder = "./data/gas";
 const outputFile = "./data/output/electricity-usage.json";
 
 /** @type {IntervalType} */
 const intervalType = "hourly";
-const files = parseFrankElectricityUsageFiles(inputFolder, intervalType);
+const files = parseFrankElectricityUsageFiles(
+  electricityInputFolder,
+  intervalType
+);
 const rows = getUsageEntriesFromFiles(files);
 writeUsageDetailsJson(intervalType, rows, outputFile);
 
+// Input file types
+/** @typedef {('hourly'|'daily'|'monthly')} IntervalType */
+// Electricity
 /**
- * Input file types:
- * @typedef {('hourly'|'daily'|'monthly')} IntervalType
- *
  * @typedef FrankElectricityUsage
  * @type {object}
  * @property {number} kw
  * @property {number} unroundedCost e.g. 0.136252
- * @property {number} costNZD e.g. 0.14
  * @property {string} id e.g. "e11a6eb8404241f57435aaec056cdb8e"
  * @property {string} startDate e.g. "2024-05-20T00:00:00+12:00",
  * @property {string} endDate e.g. "2024-05-20T00:59:59+12:00",
  * @property {IntervalType} intervalType e.g. "hourly"
- *
+ */
+/**
  * @typedef FrankSupplyPoint
  * @type {object}
  * @property {string} id
  * @property {string} startDate
  * @property {string} endDate
  * @property {FrankElectricityUsage[]} usage
- *
+ */
+/**
  * @typedef FrankElectricityUsageFile
  * @type {object}
  * @property {string} intervalType
  * @property {FrankSupplyPoint[]} supplyPoints Seems to be a single-item array
- *
- * Output types:
+ */
+// Gas
+/**
+ * @typedef GasConsumptionTotal
+ * @type {object}
+ * @property {number} kw
+ * @property {number} unroundedCost
+ */
+/**
+ * @typedef GasConsumptionEmptyEntry
+ * @type {object}
+ * @property {'empty'} type
+ */
+/**
+ * @typedef GasConsumptionNonEmptyEntry
+ * @type {object}
+ * @property {'actual'|'estimated'} type
+ * @property {string} startDate
+ * @property {string} endDate
+ * @property {number} days
+ * @property {GasConsumptionTotal} total
+ */
+/** @typedef {(GasConsumptionEmptyEntry|GasConsumptionNonEmptyEntry)} GasConsumptionEntry */
+/**
+ * @typedef FrankGasUsageFile
+ * @type {object}
+ * @property {number} year
+ * @property {GasConsumptionEntry[]} consumptionList
+ */
+
+// Output types
+/**
  * @typedef UsageEntry
  * @type {object}
  * @property {string} startDate the start time
  * @property {number} usage usage in kwH
- *
+ */
+/**
  * @typedef UsageDetails
  * @type {object}
  * @property {IntervalType} intervalType the period of time between usage entries
  * @property {UsageEntry[]} usage usage in chronological order
+ 
+/**
+ * @typedef GasUsage
+ * @type {object}
+ * @property {string} startDate
+ * @property {string} endDate
+ * @property {number} usage usage in kwH
  */
 
 /**
@@ -118,6 +161,29 @@ function getUsageEntriesFromFiles(files) {
       usage: kw,
     }))
     .sort((a, b) => Date.parse(a.startDate) - Date.parse(b.startDate));
+}
+
+/**
+ * @param {GasConsumptionEntry} entry
+ * @returns {entry is GasConsumptionNonEmptyEntry}
+ */
+const isNonEmptyEntry = (entry) => entry.type !== "empty";
+
+/**
+ * @param {string} file path to JSON usage file
+ * @returns {GasUsage}
+ */
+export function parseFrankGasUsageFile(file) {
+  /** @type {FrankGasUsageFile} */
+  const json = JSON.parse(readFileSync(file, { encoding: "utf8" }));
+  const nonEmptyEntries = json.consumptionList.filter(isNonEmptyEntry);
+  const usage = nonEmptyEntries.reduce((acc, entry) => acc + entry.total.kw, 0);
+  const startDate = nonEmptyEntries.at(1)?.startDate;
+  const endDate = nonEmptyEntries.at(-1)?.endDate;
+  if (startDate == null || endDate == null) {
+    throw new Error("Gas usage file contains no data");
+  }
+  return { startDate, endDate, usage };
 }
 
 /**
