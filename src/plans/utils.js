@@ -38,3 +38,12 @@ export const allDay = [hours(0, 24)];
 export function dailyRate(millicents) {
   return { days: daily, hours: allDay, millicents };
 }
+
+/**
+ * Pretty-prints an object as a JSON.
+ * @param {any} obj
+ * @returns {string}
+ */
+export function pp(obj) {
+  return JSON.stringify(obj, null, 2);
+}

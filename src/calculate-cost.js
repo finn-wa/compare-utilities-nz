@@ -1,34 +1,3 @@
-import { Temporal } from "temporal-polyfill";
-
-/**
- * A UsageEntry with a parsed ZonedDateTime for the startDate.
- * @typedef TemporalUsageEntry
- * @type {object}
- * @property {Temporal.ZonedDateTime} startDate the start time
- * @property {number} usage usage in kwH
- */
-/**
- * UsageDetail with total days and TemporalUsageEntries.
- * @typedef TemporalUsageDetail
- * @type {object}
- * @property {import("./parse-data.js").IntervalType} intervalType
- * @property {TemporalUsageEntry[]} usage
- * @property {number} days number of days that the usage entries span
- */
-
-/**
- * @param {import('./parse-data.js').UsageEntry[]} usageEntries
- * @returns {TemporalUsageEntry[]}
- */
-export function toTemporalUsageEntries(usageEntries) {
-  return usageEntries.map((entry) => ({
-    startDate: Temporal.ZonedDateTime.from(
-      entry.startDate + "[Pacific/Auckland]"
-    ),
-    usage: entry.usage,
-  }));
-}
-
 /**
  * Returns the rate with the lowest millicent value.
  * @param {import("./plans/types.js").Rate[]} rates a non-empty array of rates
@@ -53,7 +22,7 @@ function getBestRate(rates) {
 
 /**
  * @param {import("./plans/types.js").ElectricityPlan} plan
- * @param {TemporalUsageEntry} entry
+ * @param {import("./parse-data.js").UsageEntry} entry
  * @returns {number} cost in millicents
  */
 export function calculateHourlyUsageEntryCost(entry, plan) {
@@ -85,11 +54,10 @@ export function calculateHourlyUsageEntryCost(entry, plan) {
 }
 
 /**
- * @param {import("./parse-data.js").IntervalType} intervalType
- * @param {TemporalUsageEntry[]} usage
+ * @param {import("./parse-data.js").UsageDetails} usageDetails
  * @param {import("./plans/types.js").ElectricityPlan} plan
  */
-export function calculateCost(intervalType, usage, plan) {
+export function calculateCost({ intervalType, usage }, plan) {
   if (intervalType !== "hourly") {
     throw new Error(
       `Unsupported intervalType: "${intervalType}" (must be "hourly")`

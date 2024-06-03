@@ -1,21 +1,22 @@
-import { readFileSync } from "fs";
-import { calculateCost, toTemporalUsageEntries } from "./calculate-cost.js";
+import { calculateCost } from "./calculate-cost.js";
+import { getFrankElectricityUsage, getFrankGasUsage } from "./parse-data.js";
 import { ElectricityPlans } from "./plans/index.js";
+import { pp } from "./plans/utils.js";
 
-const usageDetailsFile = "./data/output/electricity-usage.json";
+comparePlans();
 
-/** @type {import("./parse-data.js").UsageDetails} */
-const usageDetails = JSON.parse(
-  readFileSync(usageDetailsFile, { encoding: "utf8" })
-);
-const usage = toTemporalUsageEntries(usageDetails.usage);
-const costPerPlan = Object.fromEntries(
-  ElectricityPlans.map((plan) => [
-    formatPlanName(plan),
-    mcTo$(calculateCost(usageDetails.intervalType, usage, plan)),
-  ])
-);
-console.table(costPerPlan);
+function comparePlans() {
+  const gasUsage = getFrankGasUsage();
+  console.log(pp(gasUsage));
+  const electricityUsage = getFrankElectricityUsage();
+  const costPerPlan = Object.fromEntries(
+    ElectricityPlans.map((plan) => [
+      formatPlanName(plan),
+      mcTo$(calculateCost(electricityUsage, plan)),
+    ])
+  );
+  console.table(costPerPlan);
+}
 
 /**
  * Formats millicents as dollars.

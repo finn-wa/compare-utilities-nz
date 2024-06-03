@@ -1,18 +1,27 @@
 import { readFileSync, readdirSync, writeFileSync } from "fs";
 import { join } from "path";
+import { Temporal } from "temporal-polyfill";
 
-const electricityInputFolder = "./data/electricity";
-const gasInputFolder = "./data/gas";
-const outputFile = "./data/output/electricity-usage.json";
-
-/** @type {IntervalType} */
-const intervalType = "hourly";
-const files = parseFrankElectricityUsageFiles(
-  electricityInputFolder,
-  intervalType
-);
-const rows = getUsageEntriesFromFiles(files);
-writeUsageDetailsJson(intervalType, rows, outputFile);
+/**
+ * Reads Frank electricity usage JSON from the input folder and outputs a formatted usage object.
+ *
+ * @param {string} inputFolder
+ * @param {IntervalType} intervalType
+ * @returns {UsageDetails}
+ */
+export function getFrankElectricityUsage(
+  inputFolder = "./data/electricity",
+  intervalType = "hourly"
+) {
+  const electricityUsageFiles = parseFrankElectricityUsageFiles(
+    inputFolder,
+    intervalType
+  );
+  return {
+    intervalType,
+    usage: getUsageEntriesFromFiles(electricityUsageFiles),
+  };
+}
 
 // Input file types
 /** @typedef {('hourly'|'daily'|'monthly')} IntervalType */
@@ -74,7 +83,7 @@ writeUsageDetailsJson(intervalType, rows, outputFile);
 /**
  * @typedef UsageEntry
  * @type {object}
- * @property {string} startDate the start time
+ * @property {Temporal.ZonedDateTime} startDate the start time
  * @property {number} usage usage in kwH
  */
 /**
@@ -86,8 +95,8 @@ writeUsageDetailsJson(intervalType, rows, outputFile);
 /**
  * @typedef GasUsage
  * @type {object}
- * @property {string} startDate
- * @property {string} endDate
+ * @property {Temporal.ZonedDateTime} startDate
+ * @property {Temporal.ZonedDateTime} endDate
  * @property {number} usage usage in kwH
  */
 
@@ -127,9 +136,31 @@ function parseFrankElectricityUsageFiles(dataDir, intervalType = "hourly") {
     )
     .sort(
       (a, b) =>
-        Date.parse(a.supplyPoints[0].startDate) -
-        Date.parse(b.supplyPoints[0].startDate)
+        Temporal.Instant.from(a.supplyPoints[0].startDate).since(
+          Temporal.Instant.from(b.supplyPoints[0].startDate)
+        ).milliseconds
     );
+}
+
+const tz = Temporal.TimeZone.from("Pacific/Auckland");
+
+/**
+ * @param {string} date
+ * @returns {Temporal.ZonedDateTime}
+ */
+function parseDate(date) {
+  return Temporal.PlainDateTime.from(date).toZonedDateTime(tz);
+}
+
+/**
+ * @param {FrankSupplyPoint} supplyPoint
+ * @returns {UsageEntry[]}
+ */
+function convertUsageEntries(supplyPoint) {
+  return supplyPoint.usage.map((frankUsage) => ({
+    startDate: parseDate(frankUsage.startDate),
+    usage: frankUsage.kw,
+  }));
 }
 
 /**
@@ -138,29 +169,29 @@ function parseFrankElectricityUsageFiles(dataDir, intervalType = "hourly") {
  */
 function getUsageEntriesFromFiles(files) {
   console.log("Combining usage details from all files");
-  /** @type {FrankElectricityUsage[]} */
-  const allUsage = [];
-  /** @type {number} */
-  let lastFileEndDate = 0;
-  for (const file of files) {
-    const startDate = Date.parse(file.supplyPoints[0].startDate);
-    if (lastFileEndDate !== 0 && startDate - lastFileEndDate !== 1000) {
+  if (files.length === 0) {
+    throw new Error("At least one file is required");
+  }
+
+  let i = 0;
+  let supplyPoint = files[i].supplyPoints[0];
+  let lastFileEndDate = parseDate(supplyPoint.endDate);
+  const allUsage = [...convertUsageEntries(supplyPoint)];
+
+  for (i = 1; i < files.length; i++) {
+    supplyPoint = files[i].supplyPoints[0];
+    const startDate = parseDate(supplyPoint.startDate);
+    const timeSinceLastFile = startDate.since(lastFileEndDate).total("seconds");
+    if (timeSinceLastFile !== 1) {
       throw new Error(
-        `Expected 1 second between files, found ${
-          (startDate - lastFileEndDate) / 1000
-        } (startDate: ${file.supplyPoints[0].startDate})`
+        `Expected 1 second between files, found ${timeSinceLastFile} (startDate: ${startDate})`
       );
     }
-    allUsage.push(...file.supplyPoints[0].usage);
-    lastFileEndDate = Date.parse(file.supplyPoints[0].endDate);
+    allUsage.push(...convertUsageEntries(supplyPoint));
+    lastFileEndDate = parseDate(supplyPoint.endDate);
   }
-  return allUsage
-    .map(({ startDate, unroundedCost, kw }) => ({
-      startDate,
-      cost: unroundedCost,
-      usage: kw,
-    }))
-    .sort((a, b) => Date.parse(a.startDate) - Date.parse(b.startDate));
+
+  return allUsage;
 }
 
 /**
@@ -173,17 +204,21 @@ const isNonEmptyEntry = (entry) => entry.type !== "empty";
  * @param {string} file path to JSON usage file
  * @returns {GasUsage}
  */
-export function parseFrankGasUsageFile(file) {
+export function getFrankGasUsage(file = "./data/gas/2024.json") {
   /** @type {FrankGasUsageFile} */
   const json = JSON.parse(readFileSync(file, { encoding: "utf8" }));
   const nonEmptyEntries = json.consumptionList.filter(isNonEmptyEntry);
   const usage = nonEmptyEntries.reduce((acc, entry) => acc + entry.total.kw, 0);
-  const startDate = nonEmptyEntries.at(1)?.startDate;
+  const startDate = nonEmptyEntries.at(0)?.startDate;
   const endDate = nonEmptyEntries.at(-1)?.endDate;
   if (startDate == null || endDate == null) {
     throw new Error("Gas usage file contains no data");
   }
-  return { startDate, endDate, usage };
+  return {
+    startDate: parseDate(startDate),
+    endDate: parseDate(endDate),
+    usage,
+  };
 }
 
 /**
@@ -202,7 +237,7 @@ function toCsvString(rows) {
   console.log("Converting rows to CSV");
   let contents = '"startDate", "usage"\n';
   for (const { startDate, usage } of rows) {
-    contents += toCsvRow([startDate, usage]) + "\n";
+    contents += toCsvRow([startDate.toString(), usage]) + "\n";
   }
   return contents;
 }
@@ -218,14 +253,11 @@ function writeCsv(rows, outputPath) {
 }
 
 /**
- * @param {IntervalType} intervalType
- * @param {UsageEntry[]} usage
+ * @param {object} jsonObject
  * @param {string} outputPath output file path
  */
-function writeUsageDetailsJson(intervalType, usage, outputPath) {
+function writeJson(jsonObject, outputPath) {
   console.log("Writing JSON output to " + outputPath);
-  /** @type {UsageDetails} */
-  const usageDetails = { intervalType, usage };
-  const json = JSON.stringify(usageDetails);
+  const json = JSON.stringify(jsonObject);
   writeFileSync(outputPath, json, { encoding: "utf8" });
 }
