@@ -11,7 +11,9 @@ async function getFrankHourlyElectricityData() {
   let startDate = rangeStart;
 
   while (startDate.dayOfYear < rangeEnd.dayOfYear) {
-    const endDate = startDate.add({ days: 5 });
+    // Start and end date are both inclusive
+    // Max hours of data is 100
+    const endDate = startDate.add({ days: 3 });
     const response = await requestUsage(
       {
         startDate: startDate.toString(),
@@ -24,7 +26,7 @@ async function getFrankHourlyElectricityData() {
       response,
       `./data/electricity/${startDate.toString()}_${endDate.toString()}.json`
     );
-    startDate = endDate;
+    startDate = endDate.add({ days: 1 });
   }
 }
 

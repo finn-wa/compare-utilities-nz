@@ -41,7 +41,6 @@ export function getFrankElectricityUsage(
  * @type {object}
  * @property {string} id
  * @property {string} startDate
- * @property {string} endDate
  * @property {FrankElectricityUsage[]} usage
  */
 /**
@@ -174,20 +173,24 @@ function getUsageEntriesFromFiles(files) {
 
   let i = 0;
   let supplyPoint = files[i].supplyPoints[0];
-  let lastFileEndDate = parseDate(supplyPoint.endDate);
+  let lastFileEndDate = parseDate(
+    supplyPoint.usage[supplyPoint.usage.length - 1].endDate
+  );
   const allUsage = [...convertUsageEntries(supplyPoint)];
 
   for (i = 1; i < files.length; i++) {
     supplyPoint = files[i].supplyPoints[0];
-    const startDate = parseDate(supplyPoint.startDate);
+    const startDate = parseDate(supplyPoint.usage[0].startDate);
     const timeSinceLastFile = startDate.since(lastFileEndDate).total("seconds");
     if (timeSinceLastFile !== 1) {
       throw new Error(
-        `Expected 1 second between files, found ${timeSinceLastFile} (startDate: ${startDate})`
+        `Expected 1 second between files, found ${timeSinceLastFile} (${startDate} - ${lastFileEndDate} )`
       );
     }
     allUsage.push(...convertUsageEntries(supplyPoint));
-    lastFileEndDate = parseDate(supplyPoint.endDate);
+    lastFileEndDate = parseDate(
+      supplyPoint.usage[supplyPoint.usage.length - 1].endDate
+    );
   }
 
   return allUsage;
