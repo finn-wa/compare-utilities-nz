@@ -53,7 +53,7 @@ export const electricKiwiMoveMasterLowUser = {
   id: "electricKiwiMoveMasterLowUser",
   provider,
   name: "MoveMaster",
-  variant: "Low User",
+  variant: "Low",
   bundle: [],
   dailyMillicents: 69000,
   rates: [
@@ -82,7 +82,7 @@ export const electricKiwiMoveMasterStandardUser = {
   id: "electricKiwiMoveMasterStandardUser",
   provider,
   name: "MoveMaster",
-  variant: "Standard User",
+  variant: "Std",
   bundle: [],
   dailyMillicents: 254_000,
   rates: [
@@ -111,7 +111,7 @@ export const electricKiwiKiwiLowUser = {
   id: "electricKiwiKiwiLowUser",
   provider,
   name: "Kiwi",
-  variant: "Low User",
+  variant: "Low",
   bundle: [],
   dailyMillicents: 69_000,
   rates: [
@@ -126,7 +126,7 @@ export const electricKiwiKiwiStandardUser = {
   id: "electricKiwiKiwiStandardUser",
   provider,
   name: "Kiwi",
-  variant: "Standard User",
+  variant: "Std",
   bundle: [],
   dailyMillicents: 254_000,
   rates: [
@@ -141,7 +141,7 @@ export const electricKiwiPrepay300LowUser = {
   id: "electricKiwiPrepay300LowUser",
   provider,
   name: "Prepay 300",
-  variant: "Low User",
+  variant: "Low",
   bundle: [],
   dailyMillicents: 103_000,
   rates: [
@@ -156,7 +156,7 @@ export const electricKiwiPrepay300StandardUser = {
   id: "electricKiwiPrepay300StandardUser",
   provider,
   name: "Prepay 300",
-  variant: "Standard User",
+  variant: "Std",
   bundle: [],
   dailyMillicents: 250_000,
   rates: [

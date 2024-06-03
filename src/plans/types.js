@@ -29,7 +29,7 @@
  * @property {string} name Name of the plan
  * @property {number} dailyMillicents Fixed cost in millicents
  * @property {ServiceType[]} bundle Required bundled services (may be empty)
- * @property {string} [variant] Optional variant (e.g. "Low User")
+ * @property {string} [variant] Optional variant (e.g. "Low")
  */
 /**
  * An electricity plan

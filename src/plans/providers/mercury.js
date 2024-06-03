@@ -2,12 +2,14 @@ import { dailyRate } from "../utils.js";
 
 const provider = "Mercury";
 
+// All electricity plans have "Anytime" pricing
+
 /** @type {import("../types.js").ElectricityPlan} */
 export const mercuryOpenTermLowUserElectricity = {
   id: "mercuryOpenTermLowUserElectricity",
   provider,
   name: "Electricity - Open Term",
-  variant: "Low User, Anytime",
+  variant: "Low",
   dailyMillicents: 138_000,
   rates: [dailyRate(21_660)],
   bundle: [],
@@ -18,7 +20,7 @@ export const mercuryFixedTermLowUserElectricity = {
   id: "mercuryFixedTermLowUserElectricity",
   provider,
   name: "Electricity - Fixed Term - 1 year, $300 credit",
-  variant: "Low User, Anytime",
+  variant: "Low",
   dailyMillicents: 138_000,
   rates: [dailyRate(29_330)],
   bundle: [],
@@ -29,7 +31,7 @@ export const mercuryOpenTermStandardUserElectricity = {
   id: "mercuryOpenTermStandardUserElectricity",
   provider,
   name: "Electricity - Open Term",
-  variant: "Standard User, Anytime",
+  variant: "Std",
   dailyMillicents: 194_350,
   rates: [dailyRate(19_090)],
   bundle: [],
@@ -40,7 +42,7 @@ export const mercuryFixedTermStandardUserElectricity = {
   id: "mercuryFixedTermLowUserElectricity",
   provider,
   name: "Electricity - Fixed Term - 1 year, $300 credit",
-  variant: "Standard User, Anytime",
+  variant: "Std",
   dailyMillicents: 276_000,
   rates: [dailyRate(23_040)],
   bundle: [],
@@ -57,7 +59,7 @@ export const mercuryOpenTermStandardUserGas = {
   id: "mercuryOpenTermStandardUserGas",
   provider,
   name: "Gas - Open Term",
-  variant: "Standard User",
+  variant: "Std",
   dailyMillicents: dualFuelDiscount(161_000),
   kwhMillicents: 11_460,
   bundle: ["electricity"],
@@ -68,7 +70,7 @@ export const mercuryOpenTermLowUserGas = {
   id: "mercuryOpenTermLowUserGas",
   provider,
   name: "Gas - Open Term",
-  variant: "Low User",
+  variant: "Low",
   dailyMillicents: dualFuelDiscount(143_750),
   kwhMillicents: 13_060,
   bundle: ["electricity"],
@@ -82,7 +84,7 @@ export const mercuryOpenTermLowUserGasUnbundled = {
   id: "mercuryOpenTermLowUserGas",
   provider,
   name: "Gas - Open Term",
-  variant: "Low User",
+  variant: "Low",
   dailyMillicents: 143_750,
   kwhMillicents: 13_060,
   bundle: [],
