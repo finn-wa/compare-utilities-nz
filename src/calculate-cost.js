@@ -1,3 +1,7 @@
+import { getFrankElectricityUsage, getFrankGasUsage } from "./parse-data.js";
+import { ElectricityPlans, GasPlans } from "./plans/index.js";
+import { pp } from "./plans/utils.js";
+
 /**
  * Returns the rate with the lowest millicent value.
  * @param {import("./plans/types.js").Rate[]} rates a non-empty array of rates
@@ -57,7 +61,7 @@ export function calculateHourlyUsageEntryCost(entry, plan) {
  * @param {import("./parse-data.js").UsageDetails} usageDetails
  * @param {import("./plans/types.js").ElectricityPlan} plan
  */
-export function calculateCost({ intervalType, usage }, plan) {
+export function calculateElectricityPlanCost({ intervalType, usage }, plan) {
   if (intervalType !== "hourly") {
     throw new Error(
       `Unsupported intervalType: "${intervalType}" (must be "hourly")`
@@ -68,4 +72,113 @@ export function calculateCost({ intervalType, usage }, plan) {
     0
   );
   return cost;
+}
+
+/**
+ * @param {import("./parse-data.js").GasUsage} gasUsage
+ * @param {import("./plans/types.js").PipedGasPlan} plan
+ */
+export function calculateGasPlanCost(gasUsage, plan) {
+  const days = gasUsage.endDate.since(gasUsage.startDate).total("days");
+  return Math.round(
+    gasUsage.usage * plan.kwhMillicents + days * plan.dailyMillicents
+  );
+}
+
+/**
+ * @typedef PlanOptions
+ * @type {object}
+ * @property {import("./plans/types.js").ElectricityPlan[]} electricity
+ * @property {import("./plans/types.js").PipedGasPlan[]} gas
+ */
+/**
+ * @typedef PlanSelection
+ * @type {object}
+ * @property {{plan: import("./plans/types.js").ElectricityPlan, cost: number}} electricity
+ * @property {{plan: import("./plans/types.js").PipedGasPlan, cost: number}} gas
+ */
+
+/**
+ *
+ * @param {PlanOptions} plans
+ * @param {import("./parse-data.js").UsageDetails} electricityUsage
+ * @param {import("./parse-data.js").GasUsage} gasUsage
+ * @returns {PlanSelection}
+ */
+function selectBestPlan(plans, electricityUsage, gasUsage) {
+  const bestElectricityPlan = plans.electricity
+    .map((plan) => ({
+      plan,
+      cost: calculateElectricityPlanCost(electricityUsage, plan),
+    }))
+    .sort((a, b) => a.cost - b.cost)
+    .at(0);
+  if (bestElectricityPlan == null) {
+    throw new Error("No electricity plans");
+  }
+  const bestGasPlan = plans.gas
+    .map((plan) => ({
+      plan,
+      cost: calculateGasPlanCost(gasUsage, plan),
+    }))
+    .sort((a, b) => a.cost - b.cost)
+    .at(0);
+  if (bestGasPlan == null) {
+    throw new Error("No gas plans");
+  }
+  return {
+    electricity: bestElectricityPlan,
+    gas: bestGasPlan,
+  };
+}
+
+/**
+ *
+ * @param {import("./parse-data.js").UsageDetails} electricityUsage
+ * @param {import("./parse-data.js").GasUsage} gasUsage
+ * @returns
+ */
+export function comparePlans(
+  electricityUsage = getFrankElectricityUsage(),
+  gasUsage = getFrankGasUsage()
+) {
+  /** @type {Object.<string, PlanOptions>} */
+  const planOptions = {};
+  // This could be simplified if plans had a type: ServiceType property
+  for (const plan of ElectricityPlans) {
+    if (planOptions[plan.provider] === undefined) {
+      planOptions[plan.provider] = {
+        electricity: [],
+        gas: [],
+      };
+    }
+    planOptions[plan.provider].electricity.push(plan);
+  }
+  for (const plan of GasPlans) {
+    if (planOptions[plan.provider] === undefined) {
+      planOptions[plan.provider] = {
+        electricity: [],
+        gas: [],
+      };
+    }
+    planOptions[plan.provider].gas.push(plan);
+  }
+
+  const unbundledPlans = {
+    electricity: ElectricityPlans.filter((plan) => plan.bundle.length === 0),
+    gas: GasPlans.filter((plan) => plan.bundle.length === 0),
+  };
+  planOptions["Unbundled"] = unbundledPlans;
+  return Object.entries(planOptions)
+    .filter(
+      ([_, options]) => options.electricity.length > 0 && options.gas.length > 0
+    )
+    .map(([provider, options]) => {
+      const selectedPlan = selectBestPlan(options, electricityUsage, gasUsage);
+      return {
+        name: provider,
+        electricity: selectedPlan.electricity,
+        gas: selectedPlan.gas,
+      };
+    });
 }
