@@ -86,6 +86,28 @@ export function calculateGasPlanCost(gasUsage, plan) {
 }
 
 /**
+  @typedef {{
+    electricity: import("./parse-data.js").UsageDetails,
+    gas: import("./parse-data.js").GasUsage,
+  }} UtilityUsage 
+*/
+
+/**
+ * @param {UtilityUsage} usage
+ */
+export function comparePlansIndividually(usage) {
+  const electricity = ElectricityPlans.map((plan) => ({
+    plan,
+    cost: calculateElectricityPlanCost(usage.electricity, plan),
+  })).sort((a, b) => a.cost - b.cost);
+  const gas = GasPlans.map((plan) => ({
+    plan,
+    cost: calculateGasPlanCost(usage.gas, plan),
+  })).sort((a, b) => a.cost - b.cost);
+  return { electricity, gas };
+}
+
+/**
  * @typedef PlanOptions
  * @type {object}
  * @property {import("./plans/types.js").ElectricityPlan[]} electricity
@@ -99,33 +121,33 @@ export function calculateGasPlanCost(gasUsage, plan) {
  */
 
 /**
- *
  * @param {PlanOptions} plans
- * @param {import("./parse-data.js").UsageDetails} electricityUsage
- * @param {import("./parse-data.js").GasUsage} gasUsage
+ * @param {UtilityUsage} usage
  * @returns {PlanSelection}
  */
-function selectBestPlan(plans, electricityUsage, gasUsage) {
+function selectBestPlan(plans, usage) {
+  if (plans.electricity.length === 0 || plans.gas.length === 0) {
+    throw new Error("Missing plans: " + pp(plans));
+  }
   const bestElectricityPlan = plans.electricity
     .map((plan) => ({
       plan,
-      cost: calculateElectricityPlanCost(electricityUsage, plan),
+      cost: calculateElectricityPlanCost(usage.electricity, plan),
     }))
-    .sort((a, b) => a.cost - b.cost)
-    .at(0);
-  if (bestElectricityPlan == null) {
-    throw new Error("No electricity plans");
-  }
+    .reduce((min, curr) => (curr.cost < min.cost ? curr : min), {
+      cost: Number.MAX_SAFE_INTEGER,
+      plan: plans.electricity[0],
+    });
+
   const bestGasPlan = plans.gas
     .map((plan) => ({
       plan,
-      cost: calculateGasPlanCost(gasUsage, plan),
+      cost: calculateGasPlanCost(usage.gas, plan),
     }))
-    .sort((a, b) => a.cost - b.cost)
-    .at(0);
-  if (bestGasPlan == null) {
-    throw new Error("No gas plans");
-  }
+    .reduce((min, curr) => (curr.cost < min.cost ? curr : min), {
+      cost: Number.MAX_SAFE_INTEGER,
+      plan: plans.gas[0],
+    });
   return {
     electricity: bestElectricityPlan,
     gas: bestGasPlan,
@@ -133,15 +155,25 @@ function selectBestPlan(plans, electricityUsage, gasUsage) {
 }
 
 /**
- *
- * @param {import("./parse-data.js").UsageDetails} electricityUsage
- * @param {import("./parse-data.js").GasUsage} gasUsage
- * @returns
+ @typedef {{    
+    name: string;
+      electricity: {
+          plan: import("./plans/types.js").ElectricityPlan;
+          cost: number;
+      };
+      gas: {
+          plan: import("./plans/types.js").PipedGasPlan;
+          cost: number;
+      };
+      total: number;
+  }} PlanComparison
  */
-export function comparePlans(
-  electricityUsage = getFrankElectricityUsage(),
-  gasUsage = getFrankGasUsage()
-) {
+/**
+ *
+ * @param {UtilityUsage} usage
+ * @returns {PlanComparison[]}
+ */
+export function comparePlanCombinations(usage) {
   /** @type {Object.<string, PlanOptions>} */
   const planOptions = {};
   // This could be simplified if plans had a type: ServiceType property
@@ -174,11 +206,13 @@ export function comparePlans(
       ([_, options]) => options.electricity.length > 0 && options.gas.length > 0
     )
     .map(([provider, options]) => {
-      const selectedPlan = selectBestPlan(options, electricityUsage, gasUsage);
+      const selectedPlan = selectBestPlan(options, usage);
       return {
         name: provider,
         electricity: selectedPlan.electricity,
         gas: selectedPlan.gas,
+        total: selectedPlan.electricity.cost + selectedPlan.gas.cost,
       };
-    });
+    })
+    .sort((a, b) => a.total - b.total);
 }

@@ -1,41 +1,51 @@
 import {
-  calculateElectricityPlanCost,
-  calculateGasPlanCost,
-  comparePlans,
+  comparePlanCombinations,
+  comparePlansIndividually,
 } from "./calculate-cost.js";
 import { getFrankElectricityUsage, getFrankGasUsage } from "./parse-data.js";
-import { ElectricityPlans, GasPlans } from "./plans/index.js";
 
-comparePlansCombined();
+const usage = {
+  electricity: getFrankElectricityUsage(),
+  gas: getFrankGasUsage(),
+};
+printIndividualComparison(usage);
+printCombinedComparison(usage);
 
-function comparePlansCombined() {
-  const plans = comparePlans();
+/**
+ * @param {import("./calculate-cost.js").UtilityUsage} usage
+ */
+function printCombinedComparison(usage) {
+  const plans = comparePlanCombinations(usage);
   const planTable = plans.map((choice) => ({
     name: choice.name,
     electricity: formatPlanName(choice.electricity.plan),
     gas: formatPlanName(choice.gas.plan),
-    cost: mcTo$(choice.electricity.cost + choice.gas.cost),
+    cost: mcTo$(choice.total),
   }));
+  console.log("Plan Combinations");
   console.table(planTable);
 }
 
-function comparePlansIndividually() {
-  const electricityUsage = getFrankElectricityUsage();
-  const electricityPlanCost = Object.fromEntries(
-    ElectricityPlans.map((plan) => [
-      formatPlanName(plan),
-      mcTo$(calculateElectricityPlanCost(electricityUsage, plan)),
-    ])
+/**
+ *
+ * @param {import("./calculate-cost.js").UtilityUsage} usage
+ */
+function printIndividualComparison(usage) {
+  const { gas, electricity } = comparePlansIndividually(usage);
+  console.log("Electricity Plans");
+  console.table(
+    electricity.map(({ plan, cost }) => ({
+      name: formatPlanName(plan),
+      cost: mcTo$(cost),
+    }))
   );
-  console.table(electricityPlanCost);
-  const gasUsage = getFrankGasUsage();
-  const gasPlanCost = Object.fromEntries(
-    GasPlans.map((plan) => [
-      formatPlanName(plan),
-      mcTo$(calculateGasPlanCost(gasUsage, plan)),
-    ])
+  console.log("Gas Plans");
+  console.table(
+    gas.map(({ plan, cost }) => ({
+      name: formatPlanName(plan),
+      cost: mcTo$(cost),
+    }))
   );
-  console.table(gasPlanCost);
 }
 
 /**
@@ -52,9 +62,12 @@ function mcTo$(mc) {
  * @returns {string}
  */
 function formatPlanName(plan) {
-  const name = `${plan.provider}: ${plan.name}`;
+  let name = `${plan.provider}: ${plan.name}`;
   if (plan.variant != null) {
-    return `${name} (${plan.variant})`;
+    name += ` (${plan.variant})`;
+  }
+  if (plan.bundle.length > 0) {
+    name = "*" + name;
   }
   return name;
 }

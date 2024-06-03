@@ -251,13 +251,3 @@ function writeCsv(rows, outputPath) {
   console.log("Writing CSV output to " + outputPath);
   writeFileSync(outputPath, csv, { encoding: "utf8" });
 }
-
-/**
- * @param {object} jsonObject
- * @param {string} outputPath output file path
- */
-function writeJson(jsonObject, outputPath) {
-  console.log("Writing JSON output to " + outputPath);
-  const json = JSON.stringify(jsonObject);
-  writeFileSync(outputPath, json, { encoding: "utf8" });
-}

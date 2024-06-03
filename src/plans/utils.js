@@ -1,3 +1,5 @@
+import { writeFileSync } from "fs";
+
 /** @type {import("./types.js").Day[]} */
 export const weekdays = [1, 2, 3, 4, 5];
 /** @type {import("./types.js").Day[]} */
@@ -46,4 +48,14 @@ export function dailyRate(millicents) {
  */
 export function pp(obj) {
   return JSON.stringify(obj, null, 2);
+}
+
+/**
+ * @param {object} jsonObject
+ * @param {string} outputPath output file path
+ */
+export function writeJson(jsonObject, outputPath) {
+  console.log("Writing JSON output to " + outputPath);
+  const json = JSON.stringify(jsonObject);
+  writeFileSync(outputPath, json, { encoding: "utf8" });
 }
