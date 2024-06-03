@@ -106,7 +106,6 @@ export function getFrankElectricityUsage(
  * @returns {FrankElectricityUsageFile}
  */
 function parseFrankElectricityUsageFile(file, intervalType) {
-  console.log("Parsing " + file);
   /** @type {FrankElectricityUsageFile} */
   const usageFile = JSON.parse(readFileSync(file, { encoding: "utf8" }));
   if (usageFile.supplyPoints.length !== 1) {

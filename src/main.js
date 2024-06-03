@@ -67,7 +67,7 @@ function formatPlanName(plan) {
     name += ` (${plan.variant})`;
   }
   if (plan.bundle.length > 0) {
-    name = "*" + name;
+    name += "*";
   }
   return name;
 }

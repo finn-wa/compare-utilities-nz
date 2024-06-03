@@ -6,8 +6,12 @@ import {
   contactLivingSmartGas,
 } from "./providers/contact.js";
 import {
+  electricKiwiKiwiLowUser,
+  electricKiwiKiwiStandardUser,
   electricKiwiMoveMasterLowUser,
   electricKiwiMoveMasterStandardUser,
+  electricKiwiPrepay300LowUser,
+  electricKiwiPrepay300StandardUser,
 } from "./providers/electric-kiwi.js";
 import {
   frankGasBundled,
@@ -22,20 +26,24 @@ import {
   genesisEnergyPlusStandardUserGas,
 } from "./providers/genesis.js";
 import {
-  mercuryOpenTermLowUseElectricity,
-  mercuryOpenTermLowUseGas,
-  mercuryOpenTermLowUseGasUnbundled,
-  mercuryOpenTermStandardUseElectricity,
-  mercuryOpenTermStandardUseGas,
+  mercuryOpenTermLowUserElectricity,
+  mercuryOpenTermLowUserGas,
+  mercuryOpenTermLowUserGasUnbundled,
+  mercuryOpenTermStandardUserElectricity,
+  mercuryOpenTermStandardUserGas,
 } from "./providers/mercury.js";
 
 export const ElectricityPlan = {
   electricKiwiMoveMasterLowUser,
   electricKiwiMoveMasterStandardUser,
+  electricKiwiKiwiLowUser,
+  electricKiwiKiwiStandardUser,
+  electricKiwiPrepay300LowUser,
+  electricKiwiPrepay300StandardUser,
   frankLowUser,
   frankStandardUser,
-  mercuryOpenTermLowUseElectricity,
-  mercuryOpenTermStandardUseElectricity,
+  mercuryOpenTermLowUserElectricity,
+  mercuryOpenTermStandardUserElectricity,
   genesisEnergyPlusLowUserElectricity,
   genesisEnergyPlusStandardUserElectricity,
   contactGoodNightsLowUserElectricity,
@@ -52,9 +60,9 @@ export const GasPlan = {
   frankGasUnbundled,
   genesisEnergyPlusLowUserGas,
   genesisEnergyPlusStandardUserGas,
-  mercuryOpenTermLowUseGas,
-  mercuryOpenTermStandardUseGas,
-  mercuryOpenTermLowUseGasUnbundled,
+  mercuryOpenTermLowUserGas,
+  mercuryOpenTermStandardUserGas,
+  mercuryOpenTermLowUserGasUnbundled,
   contactLivingSmartGas,
 };
 
