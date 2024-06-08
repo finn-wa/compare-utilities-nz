@@ -24,23 +24,34 @@
  * @property {string} [name] Optional name for this rate
  */
 /**
+ * @typedef {('electricity'|'gas'|'internet')} ServiceType
+ */
+/**
  * Base plan
  * @typedef {Object} Plan
  * @property {string} id unique identifier for the plan
  * @property {string} provider Name of the provider
  * @property {string} name Name of the plan
- * @property {number} dailyMillicents Fixed cost in millicents
  * @property {ServiceType[]} bundle Required bundled services (may be empty)
  * @property {string} [variant] Optional variant (e.g. "Low")
  */
 /**
+ * @typedef {Object} DailyRate
+ * @property {number} dailyMillicents Fixed cost in millicents
+ */
+/**
+ * @typedef {Object} MonthlyRate
+ * @property {number} monthlyMillicents Monthly cost in millicents
+ */
+/**
  * An electricity plan
- * @typedef {Plan & { rates: Rate[] }} ElectricityPlan
+ * @typedef {Plan & DailyRate & { rates: Rate[], type: 'electricity' }} ElectricityPlan
  */
 /**
  * A piped gas plan
- * @typedef {Plan & { kwhMillicents: number}} PipedGasPlan
+ * @typedef {Plan & DailyRate & { kwhMillicents: number, type: 'gas' }} PipedGasPlan
  */
 /**
- * @typedef {('electricity'|'gas'|'internet')} ServiceType
+ * An internet plan
+ * @typedef {Plan & MonthlyRate & { type: 'internet' }} InternetPlan
  */

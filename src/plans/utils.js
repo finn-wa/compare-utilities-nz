@@ -59,3 +59,30 @@ export function writeJson(jsonObject, outputPath) {
   const json = JSON.stringify(jsonObject);
   writeFileSync(outputPath, json, { encoding: "utf8" });
 }
+
+/**
+ * Adds the `type: "electricity"` property
+ * @param {Omit<import("./types.js").ElectricityPlan, 'type'>} plan
+ * @returns {import("./types.js").ElectricityPlan}
+ */
+export function electricityPlan(plan) {
+  return { type: "electricity", ...plan };
+}
+
+/**
+ * Adds the `type: "gas"` property
+ * @param {Omit<import("./types.js").PipedGasPlan, 'type'>} plan
+ * @returns {import("./types.js").PipedGasPlan}
+ */
+export function gasPlan(plan) {
+  return { type: "gas", ...plan };
+}
+
+/**
+ * Adds the `type: "internet"` property
+ * @param {Omit<import("./types.js").InternetPlan, 'type'>} plan
+ * @returns {import("./types.js").InternetPlan}
+ */
+export function internetPlan(plan) {
+  return { type: "internet", ...plan };
+}

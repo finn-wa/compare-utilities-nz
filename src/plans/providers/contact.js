@@ -1,4 +1,11 @@
-import { daily, dailyRate, hours, weekends } from "../utils.js";
+import {
+  daily,
+  dailyRate,
+  electricityPlan,
+  gasPlan,
+  hours,
+  weekends,
+} from "../utils.js";
 
 const provider = "Contact";
 
@@ -21,8 +28,7 @@ const rates = {
 };
 
 // Base electricity plans
-/** @type {import("../types.js").ElectricityPlan} */
-const contactStandardUserElectricity = {
+const contactStandardUserElectricity = electricityPlan({
   id: "contactStandardUserElectricity",
   provider,
   name: "Electricity",
@@ -30,9 +36,8 @@ const contactStandardUserElectricity = {
   dailyMillicents: 237_400,
   rates: [rates.standardUserDaily],
   bundle: [],
-};
-/** @type {import("../types.js").ElectricityPlan} */
-const contactLowUserElectricity = {
+});
+const contactLowUserElectricity = electricityPlan({
   id: "contactLowUserElectricity",
   provider,
   name: "Electricity",
@@ -40,7 +45,7 @@ const contactLowUserElectricity = {
   dailyMillicents: 103_500,
   rates: [rates.lowUserDaily],
   bundle: [],
-};
+});
 
 // Good Weekends
 /** @type {import("../types.js").ElectricityPlan} */
@@ -75,12 +80,11 @@ export const contactGoodNightsLowUserElectricity = {
 };
 
 // Gas
-/** @type {import("../types.js").PipedGasPlan} */
-export const contactLivingSmartGas = {
+export const contactLivingSmartGas = gasPlan({
   id: "contactLivingSmartGas",
   provider,
   name: "Gas - Living Smart",
   dailyMillicents: 176_874,
   kwhMillicents: 8_188,
   bundle: [],
-};
+});

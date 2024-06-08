@@ -1,4 +1,11 @@
-import { allDay, daily, hours, weekdays, weekends } from "../utils.js";
+import {
+  allDay,
+  daily,
+  electricityPlan,
+  hours,
+  weekdays,
+  weekends,
+} from "../utils.js";
 
 const provider = "Electric Kiwi";
 
@@ -55,8 +62,7 @@ const kiwiSchedule = {
   },
 };
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const electricKiwiMoveMasterLowUser = {
+export const electricKiwiMoveMasterLowUser = electricityPlan({
   id: "electricKiwiMoveMasterLowUser",
   provider,
   name: "MoveMaster",
@@ -82,10 +88,9 @@ export const electricKiwiMoveMasterLowUser = {
     },
     hourOfPower,
   ],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const electricKiwiMoveMasterStandardUser = {
+export const electricKiwiMoveMasterStandardUser = electricityPlan({
   id: "electricKiwiMoveMasterStandardUser",
   provider,
   name: "MoveMaster",
@@ -111,10 +116,9 @@ export const electricKiwiMoveMasterStandardUser = {
     },
     hourOfPower,
   ],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const electricKiwiKiwiLowUser = {
+export const electricKiwiKiwiLowUser = electricityPlan({
   id: "electricKiwiKiwiLowUser",
   provider,
   name: "Kiwi",
@@ -126,10 +130,9 @@ export const electricKiwiKiwiLowUser = {
     { ...kiwiSchedule.offPeakWeekdays, millicents: 25_980 },
     { ...kiwiSchedule.offPeakWeekends, millicents: 25_980 },
   ],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const electricKiwiKiwiStandardUser = {
+export const electricKiwiKiwiStandardUser = electricityPlan({
   id: "electricKiwiKiwiStandardUser",
   provider,
   name: "Kiwi",
@@ -141,10 +144,9 @@ export const electricKiwiKiwiStandardUser = {
     { ...kiwiSchedule.offPeakWeekdays, millicents: 34_550 },
     { ...kiwiSchedule.offPeakWeekends, millicents: 34_550 },
   ],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const electricKiwiPrepay300LowUser = {
+export const electricKiwiPrepay300LowUser = electricityPlan({
   id: "electricKiwiPrepay300LowUser",
   provider,
   name: "Prepay 300",
@@ -156,10 +158,9 @@ export const electricKiwiPrepay300LowUser = {
     { ...kiwiSchedule.offPeakWeekdays, millicents: 22_940 },
     { ...kiwiSchedule.offPeakWeekends, millicents: 22_940 },
   ],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const electricKiwiPrepay300StandardUser = {
+export const electricKiwiPrepay300StandardUser = electricityPlan({
   id: "electricKiwiPrepay300StandardUser",
   provider,
   name: "Prepay 300",
@@ -171,7 +172,7 @@ export const electricKiwiPrepay300StandardUser = {
     { ...kiwiSchedule.offPeakWeekdays, millicents: 16_200 },
     { ...kiwiSchedule.offPeakWeekends, millicents: 16_200 },
   ],
-};
+});
 
 /**
  * @typedef {{ peak: number, shoulder: number, night: number, hourOfPower: number, startDay: string, days: number }} UsageByRate */

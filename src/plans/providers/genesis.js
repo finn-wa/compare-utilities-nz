@@ -1,4 +1,4 @@
-import { dailyRate } from "../utils.js";
+import { dailyRate, electricityPlan, gasPlan } from "../utils.js";
 
 const provider = "Genesis";
 
@@ -19,8 +19,7 @@ const discount = {
 
 // Standard User
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const genesisEnergyPlusStandardUserElectricity = {
+export const genesisEnergyPlusStandardUserElectricity = electricityPlan({
   id: "genesisEnergyPlusStandardUserElectricity",
   provider,
   name: "Electricity - Energy Plus",
@@ -28,10 +27,9 @@ export const genesisEnergyPlusStandardUserElectricity = {
   dailyMillicents: discount.unbundled(260_980),
   rates: [dailyRate(discount.unbundled(22_440))],
   bundle: [],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const genesisEnergyPlusStandardUserElectricityBundled = {
+export const genesisEnergyPlusStandardUserElectricityBundled = electricityPlan({
   id: "genesisEnergyPlusStandardUserElectricityBundled",
   provider,
   name: "Electricity - Energy Plus Bundle",
@@ -39,10 +37,9 @@ export const genesisEnergyPlusStandardUserElectricityBundled = {
   dailyMillicents: discount.bundled(260_980),
   rates: [dailyRate(discount.bundled(22_440))],
   bundle: ["gas"],
-};
+});
 
-/** @type {import("../types.js").PipedGasPlan} */
-export const genesisEnergyPlusStandardUserGas = {
+export const genesisEnergyPlusStandardUserGas = gasPlan({
   id: "genesisEnergyPlusStandardUserGas",
   provider,
   name: "Gas - Energy Plus",
@@ -50,10 +47,9 @@ export const genesisEnergyPlusStandardUserGas = {
   dailyMillicents: discount.unbundled(179_780),
   kwhMillicents: discount.unbundled(11_910),
   bundle: [],
-};
+});
 
-/** @type {import("../types.js").PipedGasPlan} */
-export const genesisEnergyPlusStandardUserGasBundled = {
+export const genesisEnergyPlusStandardUserGasBundled = gasPlan({
   id: "genesisEnergyPlusStandardUserGasBundled",
   provider,
   name: "Gas - Energy Plus Bundle",
@@ -61,12 +57,11 @@ export const genesisEnergyPlusStandardUserGasBundled = {
   dailyMillicents: discount.bundled(179_780),
   kwhMillicents: discount.bundled(11_910),
   bundle: ["electricity"],
-};
+});
 
 // Low User
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const genesisEnergyPlusLowUserElectricity = {
+export const genesisEnergyPlusLowUserElectricity = electricityPlan({
   id: "genesisEnergyPlusLowUserElectricity",
   provider,
   name: "Electricity - Energy Plus",
@@ -74,10 +69,9 @@ export const genesisEnergyPlusLowUserElectricity = {
   dailyMillicents: discount.unbundled(103_500),
   rates: [dailyRate(discount.unbundled(29_580))],
   bundle: [],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const genesisEnergyPlusLowUserElectricityBundled = {
+export const genesisEnergyPlusLowUserElectricityBundled = electricityPlan({
   id: "genesisEnergyPlusLowUserElectricityBundled",
   provider,
   name: "Electricity - Energy Plus Bundle",
@@ -85,10 +79,9 @@ export const genesisEnergyPlusLowUserElectricityBundled = {
   dailyMillicents: discount.bundled(103_500),
   rates: [dailyRate(discount.bundled(29_580))],
   bundle: ["gas"],
-};
+});
 
-/** @type {import("../types.js").PipedGasPlan} */
-export const genesisEnergyPlusLowUserGas = {
+export const genesisEnergyPlusLowUserGas = gasPlan({
   id: "genesisEnergyPlusLowUserGas",
   provider,
   name: "Gas - Energy Plus",
@@ -96,10 +89,9 @@ export const genesisEnergyPlusLowUserGas = {
   dailyMillicents: discount.unbundled(164_150),
   kwhMillicents: discount.unbundled(13_350),
   bundle: [],
-};
+});
 
-/** @type {import("../types.js").PipedGasPlan} */
-export const genesisEnergyPlusLowUserGasBundled = {
+export const genesisEnergyPlusLowUserGasBundled = gasPlan({
   id: "genesisEnergyPlusLowUserGasBundled",
   provider,
   name: "Gas - Energy Plus Bundle",
@@ -107,4 +99,4 @@ export const genesisEnergyPlusLowUserGasBundled = {
   dailyMillicents: discount.bundled(164_150),
   kwhMillicents: discount.bundled(13_350),
   bundle: ["electricity"],
-};
+});

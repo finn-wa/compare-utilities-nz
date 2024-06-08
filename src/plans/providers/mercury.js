@@ -1,11 +1,10 @@
-import { dailyRate } from "../utils.js";
+import { dailyRate, electricityPlan, gasPlan } from "../utils.js";
 
 const provider = "Mercury";
 
 // All electricity plans have "Anytime" pricing
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const mercuryOpenTermLowUserElectricity = {
+export const mercuryOpenTermLowUserElectricity = electricityPlan({
   id: "mercuryOpenTermLowUserElectricity",
   provider,
   name: "Electricity - Open Term",
@@ -13,10 +12,9 @@ export const mercuryOpenTermLowUserElectricity = {
   dailyMillicents: 138_000,
   rates: [dailyRate(21_660)],
   bundle: [],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const mercuryFixedTermLowUserElectricity = {
+export const mercuryFixedTermLowUserElectricity = electricityPlan({
   id: "mercuryFixedTermLowUserElectricity",
   provider,
   name: "Electricity - Fixed Term - 1 year, $300 credit",
@@ -24,10 +22,9 @@ export const mercuryFixedTermLowUserElectricity = {
   dailyMillicents: 138_000,
   rates: [dailyRate(29_330)],
   bundle: [],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const mercuryOpenTermStandardUserElectricity = {
+export const mercuryOpenTermStandardUserElectricity = electricityPlan({
   id: "mercuryOpenTermStandardUserElectricity",
   provider,
   name: "Electricity - Open Term",
@@ -35,10 +32,9 @@ export const mercuryOpenTermStandardUserElectricity = {
   dailyMillicents: 194_350,
   rates: [dailyRate(19_090)],
   bundle: [],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const mercuryFixedTermStandardUserElectricity = {
+export const mercuryFixedTermStandardUserElectricity = electricityPlan({
   id: "mercuryFixedTermLowUserElectricity",
   provider,
   name: "Electricity - Fixed Term - 1 year, $300 credit",
@@ -46,7 +42,7 @@ export const mercuryFixedTermStandardUserElectricity = {
   dailyMillicents: 276_000,
   rates: [dailyRate(23_040)],
   bundle: [],
-};
+});
 
 /**
  * 15 cents + GST discount per day for having both gas & power with Mercury.
@@ -54,8 +50,7 @@ export const mercuryFixedTermStandardUserElectricity = {
  */
 const dualFuelDiscount = (mc) => mc - 15_000 * 1.15;
 
-/** @type {import("../types.js").PipedGasPlan} */
-export const mercuryOpenTermStandardUserGas = {
+export const mercuryOpenTermStandardUserGas = gasPlan({
   id: "mercuryOpenTermStandardUserGas",
   provider,
   name: "Gas - Open Term",
@@ -63,10 +58,9 @@ export const mercuryOpenTermStandardUserGas = {
   dailyMillicents: dualFuelDiscount(161_000),
   kwhMillicents: 11_460,
   bundle: ["electricity"],
-};
+});
 
-/** @type {import("../types.js").PipedGasPlan} */
-export const mercuryOpenTermLowUserGas = {
+export const mercuryOpenTermLowUserGas = gasPlan({
   id: "mercuryOpenTermLowUserGas",
   provider,
   name: "Gas - Open Term",
@@ -74,13 +68,12 @@ export const mercuryOpenTermLowUserGas = {
   dailyMillicents: dualFuelDiscount(143_750),
   kwhMillicents: 13_060,
   bundle: ["electricity"],
-};
+});
 
 /**
  * Note that to sign up for gas only you have to call them - so this rate may be inaccurate.
- * @type {import("../types.js").PipedGasPlan}
  */
-export const mercuryOpenTermLowUserGasUnbundled = {
+export const mercuryOpenTermLowUserGasUnbundled = gasPlan({
   id: "mercuryOpenTermLowUserGas",
   provider,
   name: "Gas - Open Term",
@@ -88,4 +81,4 @@ export const mercuryOpenTermLowUserGasUnbundled = {
   dailyMillicents: 143_750,
   kwhMillicents: 13_060,
   bundle: [],
-};
+});

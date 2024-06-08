@@ -1,7 +1,6 @@
-import { dailyRate } from "../utils.js";
+import { dailyRate, electricityPlan, gasPlan } from "../utils.js";
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const frankLowUser = {
+export const frankLowUser = electricityPlan({
   id: "frankLowUser",
   provider: "Frank",
   name: "Electricity",
@@ -9,10 +8,9 @@ export const frankLowUser = {
   dailyMillicents: 69_000,
   bundle: [],
   rates: [dailyRate(26_220)],
-};
+});
 
-/** @type {import("../types.js").ElectricityPlan} */
-export const frankStandardUser = {
+export const frankStandardUser = electricityPlan({
   id: "frankStandardUser",
   provider: "Frank",
   name: "Electricity",
@@ -20,10 +18,9 @@ export const frankStandardUser = {
   dailyMillicents: 155_250,
   bundle: [],
   rates: [dailyRate(22_310)],
-};
+});
 
-/** @type {import("../types.js").PipedGasPlan} */
-export const frankGasBundled = {
+export const frankGasBundled = gasPlan({
   id: "frankGasBundled",
   provider: "Frank",
   name: "Piped Gas",
@@ -31,10 +28,9 @@ export const frankGasBundled = {
   dailyMillicents: 184_000,
   kwhMillicents: 8_970,
   bundle: ["electricity"],
-};
+});
 
-/** @type {import("../types.js").PipedGasPlan} */
-export const frankGasUnbundled = {
+export const frankGasUnbundled = gasPlan({
   id: "frankGasUnbundled",
   provider: "Frank",
   name: "Piped Gas",
@@ -42,4 +38,4 @@ export const frankGasUnbundled = {
   dailyMillicents: 284_000,
   kwhMillicents: 8_970,
   bundle: [],
-};
+});
