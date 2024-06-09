@@ -1,6 +1,6 @@
 import { Temporal } from "temporal-polyfill";
-import { ElectricityPlans, GasPlans } from "./plans/index.js";
-import { pp } from "./plans/utils.js";
+import { ElectricityPlans, GasPlans, InternetPlans } from "./plans/index.js";
+import { needsBundle, pp, requireNonEmpty } from "./plans/utils.js";
 
 /**
  * Returns the rate with the lowest millicent value.
@@ -155,25 +155,35 @@ export function comparePlansIndividually(usage) {
 /**
  * @typedef PlanOptions
  * @type {object}
- * @property {import("./plans/types.js").ElectricityPlan[]} electricity
- * @property {import("./plans/types.js").PipedGasPlan[]} gas
+ * @property {import("./plans/types.js").ElectricityPlan[]} [electricity]
+ * @property {import("./plans/types.js").PipedGasPlan[]} [gas]
+ * @property {import("./plans/types.js").InternetPlan[]} [internet]
  */
 /**
  * @typedef PlanSelection
  * @type {object}
+ * @property {string} name
  * @property {{plan: import("./plans/types.js").ElectricityPlan, cost: number}} electricity
  * @property {{plan: import("./plans/types.js").PipedGasPlan, cost: number}} gas
+ * @property {{plan: import("./plans/types.js").InternetPlan, cost: number}} internet
+ * @property {number} total total cost
  */
 
 /**
- * @param {PlanOptions} plans
+ * @param {string} name
+ * @param {Required<PlanOptions>} plans
  * @param {UtilityUsage} usage
  * @returns {PlanSelection}
  */
-function selectBestPlan(plans, usage) {
-  if (plans.electricity.length === 0 || plans.gas.length === 0) {
-    throw new Error("Missing plans: " + pp(plans));
+function selectBestPlan(name, plans, usage) {
+  if (
+    plans.electricity.length === 0 ||
+    plans.gas.length === 0 ||
+    plans.internet.length === 0
+  ) {
+    throw new Error("No options for some utilities: " + pp(plans));
   }
+
   const bestElectricityPlan = plans.electricity
     .map((plan) => ({
       plan,
@@ -193,71 +203,137 @@ function selectBestPlan(plans, usage) {
       cost: Number.MAX_SAFE_INTEGER,
       plan: plans.gas[0],
     });
+
+  const bestInternetPlan = plans.internet.reduce(
+    (min, curr) =>
+      curr.monthlyMillicents < min.monthlyMillicents ? curr : min,
+    plans.internet[0]
+  );
   return {
+    name,
     electricity: bestElectricityPlan,
     gas: bestGasPlan,
+    internet: {
+      plan: bestInternetPlan,
+      cost: bestInternetPlan.monthlyMillicents,
+    },
+    total:
+      bestElectricityPlan.cost +
+      bestGasPlan.cost +
+      bestInternetPlan.monthlyMillicents,
   };
 }
 
 /**
- @typedef {{    
-    name: string;
-      electricity: {
-          plan: import("./plans/types.js").ElectricityPlan;
-          cost: number;
-      };
-      gas: {
-          plan: import("./plans/types.js").PipedGasPlan;
-          cost: number;
-      };
-      total: number;
-  }} PlanComparison
+ * @param {string} name
+ * @param {PlanOptions} providerPlans
+ * @param {Required<PlanOptions>} bestUnbundled
+ * @param {UtilityUsage} usage
+ * @returns {PlanSelection}
  */
+function selectBestBundledPlan(name, providerPlans, bestUnbundled, usage) {
+  const selectionsByPlan = Object.values(providerPlans)
+    .flat()
+    .filter((plan) => plan.bundle.length > 0)
+    .map((plan) => {
+      /** @type {PlanOptions} */
+      let options = {
+        [plan.type]: [plan],
+      };
+      if (plan.type !== "electricity" && plan.bundle.includes("electricity")) {
+        options.electricity = requireNonEmpty(providerPlans.electricity);
+      }
+      if (plan.type !== "gas" && plan.bundle.includes("gas")) {
+        options.gas = requireNonEmpty(providerPlans.gas);
+      }
+      if (plan.type !== "internet" && plan.bundle.includes("internet")) {
+        options.internet = requireNonEmpty(providerPlans.internet);
+      }
+      return selectBestPlan(name, { ...bestUnbundled, ...options }, usage);
+    });
+  const bestBundledPlan = selectionsByPlan
+    .map((selection) => ({
+      ...selection,
+      total:
+        selection.electricity.cost +
+        selection.gas.cost +
+        selection.internet.cost,
+    }))
+    .reduce((min, curr) => (curr.total < min.total ? curr : min), {
+      ...selectionsByPlan[0],
+      total: Number.MAX_SAFE_INTEGER,
+    });
+  return bestBundledPlan;
+}
+
+/**
+ * Returns true if at least one plan requires a bundle.
+ * @param {PlanOptions} providerOptions
+ * @returns {boolean}
+ */
+function hasBundlePlan(providerOptions) {
+  return (
+    providerOptions.electricity?.some((plan) => needsBundle(plan)) ||
+    providerOptions.gas?.some((plan) => needsBundle(plan)) ||
+    providerOptions.internet?.some((plan) => needsBundle(plan)) ||
+    false
+  );
+}
+
 /**
  *
  * @param {UtilityUsage} usage
- * @returns {PlanComparison[]}
+ * @returns {PlanSelection[]}
  */
 export function comparePlanCombinations(usage) {
   /** @type {Object.<string, PlanOptions>} */
   const planOptions = {};
-  // This could be simplified if plans had a type: ServiceType property
-  for (const plan of ElectricityPlans) {
-    if (planOptions[plan.provider] === undefined) {
-      planOptions[plan.provider] = {
-        electricity: [],
-        gas: [],
-      };
+  const getProviderOptions = (/** @type {string} */ provider) => {
+    if (planOptions[provider] === undefined) {
+      planOptions[provider] = {};
     }
-    planOptions[plan.provider].electricity.push(plan);
+    return planOptions[provider];
+  };
+  for (const plan of ElectricityPlans) {
+    const options = getProviderOptions(plan.provider);
+    options.electricity = (options.electricity ?? []).concat(plan);
   }
   for (const plan of GasPlans) {
-    if (planOptions[plan.provider] === undefined) {
-      planOptions[plan.provider] = {
-        electricity: [],
-        gas: [],
-      };
-    }
-    planOptions[plan.provider].gas.push(plan);
+    const options = getProviderOptions(plan.provider);
+    options.gas = (options.gas ?? []).concat(plan);
   }
-
+  for (const plan of InternetPlans) {
+    const options = getProviderOptions(plan.provider);
+    options.internet = (options.internet ?? []).concat(plan);
+  }
   const unbundledPlans = {
-    electricity: ElectricityPlans.filter((plan) => plan.bundle.length === 0),
-    gas: GasPlans.filter((plan) => plan.bundle.length === 0),
+    electricity: ElectricityPlans.filter((plan) => !needsBundle(plan)),
+    gas: GasPlans.filter((plan) => !needsBundle(plan)),
+    internet: InternetPlans.filter((plan) => !needsBundle(plan)),
   };
-  planOptions["Unbundled"] = unbundledPlans;
-  return Object.entries(planOptions)
-    .filter(
-      ([_, options]) => options.electricity.length > 0 && options.gas.length > 0
-    )
-    .map(([provider, options]) => {
-      const selectedPlan = selectBestPlan(options, usage);
-      return {
-        name: provider,
-        electricity: selectedPlan.electricity,
-        gas: selectedPlan.gas,
-        total: selectedPlan.electricity.cost + selectedPlan.gas.cost,
-      };
-    })
-    .sort((a, b) => a.total - b.total);
+  const bestUnbundled = selectBestPlan("Unbundled", unbundledPlans, usage);
+  // To fill in any gaps in bundles
+  const backupPlans = {
+    electricity: [bestUnbundled.electricity.plan],
+    gas: [bestUnbundled.gas.plan],
+    internet: [bestUnbundled.internet.plan],
+  };
+  /** @type {PlanSelection[]} */
+  const planSelections = [bestUnbundled];
+  for (const [provider, providerOptions] of Object.entries(planOptions)) {
+    // Skip providers without bundles, they are represented in the Unbundled entry
+    if (Object.keys(providerOptions).length === 1) {
+      continue;
+    }
+    if (hasBundlePlan(providerOptions)) {
+      planSelections.push(
+        selectBestBundledPlan(provider, providerOptions, backupPlans, usage)
+      );
+    } else {
+      planSelections.push(
+        selectBestPlan(provider, { ...backupPlans, ...providerOptions }, usage)
+      );
+    }
+  }
+  return planSelections.sort((a, b) => a.total - b.total);
 }

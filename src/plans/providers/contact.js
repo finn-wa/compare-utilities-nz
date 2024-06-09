@@ -1,9 +1,11 @@
 import {
+  $ToMc,
   daily,
   dailyRate,
   electricityPlan,
   gasPlan,
   hours,
+  internetPlan,
   weekends,
 } from "../utils.js";
 
@@ -87,4 +89,13 @@ export const contactLivingSmartGas = gasPlan({
   dailyMillicents: 176_874,
   kwhMillicents: 8_188,
   bundle: [],
+});
+
+// Internet
+export const contactFastFibre = internetPlan({
+  id: "contactFastFibre",
+  provider,
+  name: "Fast Fibre",
+  bundle: ["electricity"],
+  monthlyMillicents: $ToMc(70),
 });

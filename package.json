@@ -2,6 +2,9 @@
   "name": "compare-utilities-nz",
   "type": "module",
   "packageManager": "yarn@4.2.2",
+  "scripts": {
+    "start": "node src/main.js"
+  },
   "devDependencies": {
     "@types/node": "20",
     "typescript": "^5.4.5"

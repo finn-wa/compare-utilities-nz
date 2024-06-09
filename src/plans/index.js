@@ -1,4 +1,5 @@
 import {
+  contactFastFibre,
   contactGoodNightsLowUserElectricity,
   contactGoodNightsStandardUserElectricity,
   contactGoodWeekendsLowUserElectricity,
@@ -6,6 +7,7 @@ import {
   contactLivingSmartGas,
 } from "./providers/contact.js";
 import {
+  electricKiwiInternet,
   electricKiwiKiwiLowUser,
   electricKiwiKiwiStandardUser,
   electricKiwiMoveMasterLowUser,
@@ -26,12 +28,14 @@ import {
   genesisEnergyPlusStandardUserGas,
 } from "./providers/genesis.js";
 import {
+  mercuryFibreClassicInternet,
   mercuryOpenTermLowUserElectricity,
   mercuryOpenTermLowUserGas,
   mercuryOpenTermLowUserGasUnbundled,
   mercuryOpenTermStandardUserElectricity,
   mercuryOpenTermStandardUserGas,
 } from "./providers/mercury.js";
+import { quicRunner } from "./providers/quic.js";
 
 export const ElectricityPlan = {
   electricKiwiMoveMasterLowUser,
@@ -68,3 +72,13 @@ export const GasPlan = {
 
 /** @type {import("./types.js").PipedGasPlan[]} */
 export const GasPlans = Object.values(GasPlan);
+
+export const InternetPlan = {
+  quicRunner,
+  contactFastFibre,
+  electricKiwiInternet,
+  mercuryFibreClassicInternet,
+};
+
+/** @type {import("./types.js").InternetPlan[]} */
+export const InternetPlans = Object.values(InternetPlan);

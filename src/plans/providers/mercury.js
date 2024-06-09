@@ -1,4 +1,10 @@
-import { dailyRate, electricityPlan, gasPlan } from "../utils.js";
+import {
+  $ToMc,
+  dailyRate,
+  electricityPlan,
+  gasPlan,
+  internetPlan,
+} from "../utils.js";
 
 const provider = "Mercury";
 
@@ -81,4 +87,12 @@ export const mercuryOpenTermLowUserGasUnbundled = gasPlan({
   dailyMillicents: 143_750,
   kwhMillicents: 13_060,
   bundle: [],
+});
+
+export const mercuryFibreClassicInternet = internetPlan({
+  id: "mercuryFibreClassicInternet",
+  provider,
+  name: "Fibre Classic",
+  bundle: ["electricity"],
+  monthlyMillicents: $ToMc(91),
 });

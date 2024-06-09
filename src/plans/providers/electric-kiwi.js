@@ -3,6 +3,7 @@ import {
   daily,
   electricityPlan,
   hours,
+  internetPlan,
   weekdays,
   weekends,
 } from "../utils.js";
@@ -46,7 +47,7 @@ const moveMasterSchedule = {
   },
 };
 
-const kiwiSchedule = {
+const standardSchedule = {
   peak,
   offPeakWeekdays: {
     name: "Off-peak (weekdays)",
@@ -126,9 +127,10 @@ export const electricKiwiKiwiLowUser = electricityPlan({
   bundle: [],
   dailyMillicents: 69_000,
   rates: [
-    { ...kiwiSchedule.peak, millicents: 34_630 },
-    { ...kiwiSchedule.offPeakWeekdays, millicents: 25_980 },
-    { ...kiwiSchedule.offPeakWeekends, millicents: 25_980 },
+    { ...standardSchedule.peak, millicents: 34_630 },
+    { ...standardSchedule.offPeakWeekdays, millicents: 25_980 },
+    { ...standardSchedule.offPeakWeekends, millicents: 25_980 },
+    hourOfPower,
   ],
 });
 
@@ -140,9 +142,10 @@ export const electricKiwiKiwiStandardUser = electricityPlan({
   bundle: [],
   dailyMillicents: 254_000,
   rates: [
-    { ...kiwiSchedule.peak, millicents: 46_070 },
-    { ...kiwiSchedule.offPeakWeekdays, millicents: 34_550 },
-    { ...kiwiSchedule.offPeakWeekends, millicents: 34_550 },
+    { ...standardSchedule.peak, millicents: 46_070 },
+    { ...standardSchedule.offPeakWeekdays, millicents: 34_550 },
+    { ...standardSchedule.offPeakWeekends, millicents: 34_550 },
+    hourOfPower,
   ],
 });
 
@@ -154,9 +157,10 @@ export const electricKiwiPrepay300LowUser = electricityPlan({
   bundle: [],
   dailyMillicents: 103_000,
   rates: [
-    { ...kiwiSchedule.peak, millicents: 30_059 },
-    { ...kiwiSchedule.offPeakWeekdays, millicents: 22_940 },
-    { ...kiwiSchedule.offPeakWeekends, millicents: 22_940 },
+    { ...standardSchedule.peak, millicents: 30_590 },
+    { ...standardSchedule.offPeakWeekdays, millicents: 22_940 },
+    { ...standardSchedule.offPeakWeekends, millicents: 22_940 },
+    hourOfPower,
   ],
 });
 
@@ -168,10 +172,49 @@ export const electricKiwiPrepay300StandardUser = electricityPlan({
   bundle: [],
   dailyMillicents: 250_000,
   rates: [
-    { ...kiwiSchedule.peak, millicents: 21_590 },
-    { ...kiwiSchedule.offPeakWeekdays, millicents: 16_200 },
-    { ...kiwiSchedule.offPeakWeekends, millicents: 16_200 },
+    { ...standardSchedule.peak, millicents: 21_590 },
+    { ...standardSchedule.offPeakWeekdays, millicents: 16_200 },
+    { ...standardSchedule.offPeakWeekends, millicents: 16_200 },
+    hourOfPower,
   ],
+});
+
+export const electricKiwiPowerShifterLowUser = electricityPlan({
+  id: "electricKiwiPowerShifterLowUser",
+  provider,
+  name: "PowerShifter",
+  variant: "Low",
+  bundle: ["internet"],
+  dailyMillicents: 103_000,
+  rates: [
+    { ...standardSchedule.peak, millicents: 30_260 },
+    { ...standardSchedule.offPeakWeekdays, millicents: 22_690 },
+    { ...standardSchedule.offPeakWeekends, millicents: 22_690 },
+    hourOfPower,
+  ],
+});
+
+export const electricKiwiPowerShifterStandardUser = electricityPlan({
+  id: "electricKiwiPowerShifterStandardUser",
+  provider,
+  name: "powerShifter",
+  variant: "Std",
+  bundle: ["internet"],
+  dailyMillicents: 250_000,
+  rates: [
+    { ...standardSchedule.peak, millicents: 21_260 },
+    { ...standardSchedule.offPeakWeekdays, millicents: 15_950 },
+    { ...standardSchedule.offPeakWeekends, millicents: 15_950 },
+    hourOfPower,
+  ],
+});
+
+export const electricKiwiInternet = internetPlan({
+  id: "electricKiwiInternet",
+  provider,
+  name: "Sweet Fibre",
+  bundle: ["electricity"],
+  monthlyMillicents: 265_000 * 30, // It's a daily rate... so roughly $79.50
 });
 
 /**

@@ -3,6 +3,8 @@ import {
   comparePlansIndividually,
 } from "./calculate-cost.js";
 import { getFrankElectricityUsage, getFrankGasUsage } from "./parse-data.js";
+import { InternetPlans } from "./plans/index.js";
+import { needsBundle } from "./plans/utils.js";
 
 const usage = {
   electricity: getFrankElectricityUsage(),
@@ -20,9 +22,10 @@ function printCombinedComparison(usage) {
     name: choice.name,
     electricity: formatPlanName(choice.electricity.plan),
     gas: formatPlanName(choice.gas.plan),
+    internet: formatPlanName(choice.internet.plan),
     cost: mcTo$(choice.total),
   }));
-  console.log("Plan Combinations");
+  console.log("Plan Combinations & Provider Bundles");
   console.table(planTable);
 }
 
@@ -46,6 +49,15 @@ function printIndividualComparison(usage) {
       cost: mcTo$(cost),
     }))
   );
+  console.log("Internet Plans");
+  console.table(
+    InternetPlans.sort((a, b) => a.monthlyMillicents - b.monthlyMillicents).map(
+      (plan) => ({
+        name: formatPlanName(plan),
+        cost: mcTo$(plan.monthlyMillicents),
+      })
+    )
+  );
 }
 
 /**
@@ -66,7 +78,7 @@ function formatPlanName(plan) {
   if (plan.variant != null) {
     name += ` (${plan.variant})`;
   }
-  if (plan.bundle.length > 0) {
+  if (needsBundle(plan)) {
     name += "*";
   }
   return name;

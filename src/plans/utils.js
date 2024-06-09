@@ -86,3 +86,28 @@ export function gasPlan(plan) {
 export function internetPlan(plan) {
   return { type: "internet", ...plan };
 }
+
+/**
+ * Converts dollars to millicents
+ * @param {number} dollars dollar value
+ * @returns {number} millicent value
+ */
+export function $ToMc(dollars) {
+  return dollars * 100_000;
+}
+
+/** @type {<T extends any[]> (arr: T | null | undefined) => T} */
+export const requireNonEmpty = (arr) => {
+  if (arr == null || arr.length === 0) {
+    throw new Error("Array must be non-empty, received " + pp(arr));
+  }
+  return arr;
+};
+
+/**
+ * @param {import("./types.js").Plan} plan
+ * @returns {boolean}
+ */
+export function needsBundle(plan) {
+  return plan.bundle.length > 0;
+}
