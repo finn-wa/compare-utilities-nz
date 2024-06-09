@@ -29,9 +29,13 @@ import {
 } from "./providers/frank.js";
 import {
   genesisEnergyPlusLowUserElectricity,
+  genesisEnergyPlusLowUserElectricityBundled,
   genesisEnergyPlusLowUserGas,
+  genesisEnergyPlusLowUserGasBundled,
   genesisEnergyPlusStandardUserElectricity,
+  genesisEnergyPlusStandardUserElectricityBundled,
   genesisEnergyPlusStandardUserGas,
+  genesisEnergyPlusStandardUserGasBundled,
 } from "./providers/genesis.js";
 import {
   mercuryFibreClassicInternet,
@@ -56,6 +60,8 @@ export const ElectricityPlan = {
   mercuryOpenTermStandardUserElectricity,
   genesisEnergyPlusLowUserElectricity,
   genesisEnergyPlusStandardUserElectricity,
+  genesisEnergyPlusLowUserElectricityBundled,
+  genesisEnergyPlusStandardUserElectricityBundled,
   contactGoodNightsLowUserElectricity,
   contactGoodNightsStandardUserElectricity,
   contactGoodWeekendsLowUserElectricity,
@@ -74,6 +80,8 @@ export const GasPlan = {
   frankGasUnbundled,
   genesisEnergyPlusLowUserGas,
   genesisEnergyPlusStandardUserGas,
+  genesisEnergyPlusLowUserGasBundled,
+  genesisEnergyPlusStandardUserGasBundled,
   mercuryOpenTermLowUserGas,
   mercuryOpenTermStandardUserGas,
   mercuryOpenTermLowUserGasUnbundled,

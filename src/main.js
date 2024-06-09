@@ -26,6 +26,10 @@ function printCombinedComparison(usage) {
     cost: mcTo$(choice.total),
   }));
   console.log("Plan Combinations & Provider Bundles");
+  console.log(
+    "The best bundle from each provider + the best combination of unbundled plans"
+  );
+  console.log("Std = Standard Use, Low = Low Use, * = requires bundle");
   console.table(planTable);
 }
 
@@ -36,6 +40,7 @@ function printCombinedComparison(usage) {
 function printIndividualComparison(usage) {
   const { gas, electricity } = comparePlansIndividually(usage);
   console.log("Electricity Plans");
+  console.log("Std = Standard Use, Low = Low Use, * = requires bundle");
   console.table(
     electricity.map(({ plan, cost }) => ({
       name: formatPlanName(plan),
@@ -43,6 +48,7 @@ function printIndividualComparison(usage) {
     }))
   );
   console.log("Gas Plans");
+  console.log("Std = Standard Use, Low = Low Use, * = requires bundle");
   console.table(
     gas.map(({ plan, cost }) => ({
       name: formatPlanName(plan),
@@ -50,6 +56,7 @@ function printIndividualComparison(usage) {
     }))
   );
   console.log("Internet Plans");
+  console.log("* = requires bundle");
   console.table(
     InternetPlans.sort((a, b) => a.monthlyMillicents - b.monthlyMillicents).map(
       (plan) => ({

@@ -4,70 +4,77 @@ Compares power & gas plans from various providers in NZ, based on my flat's hour
 
 Example output for 6 months of data (converted from `console.table` output to markdown tables):
 
-```
-Reading files from ./data/electricity
-Combining usage details from all files
-```
-
 ### Electricity Plans
 
-| name                                       | cost     |
-| ------------------------------------------ | -------- |
-| Contact: Electricity - Good Nights (Low)   | $693.21  |
-| Electric Kiwi: Prepay 300 (Low)            | $698.53  |
-| Mercury: Electricity - Open Term (Low)     | $720.85  |
-| Electric Kiwi: Kiwi (Low)                  | $724.27  |
-| Frank: Electricity (Low)                   | $735.33  |
-| Flick: Flat (Low)                          | $736.18  |
-| Flick: Off Peak (Low)                      | $736.98  |
-| Mercury: Electricity - Open Term (Std)     | $737.13  |
-| Electric Kiwi: Prepay 300 (Std)            | $741.45  |
-| Contact: Electricity - Good Nights (Std)   | $759.88  |
-| Frank: Electricity (Std)                   | $760.83  |
-| Contact: Electricity - Good Weekends (Low) | $766.98  |
-| Flick: Flat (Std)                          | $783.71  |
-| Flick: Off Peak (Std)                      | $784.75  |
-| Contact: Electricity - Good Weekends (Std) | $817.40  |
-| Electric Kiwi: MoveMaster (Low)            | $835.37  |
-| Genesis: Electricity - Energy Plus (Low)   | $839.53  |
-| Electric Kiwi: MoveMaster (Std)            | $883.75  |
-| Genesis: Electricity - Energy Plus (Std)   | $884.66  |
-| Electric Kiwi: Kiwi (Std)                  | $1190.51 |
+_Std = Standard Use, Low = Low Use, \* = requires bundle_
+
+| name                                              | cost     |
+| ------------------------------------------------- | -------- |
+| Contact: Electricity - Good Nights (Low)          | $693.21  |
+| Electric Kiwi: Prepay 300 (Low)                   | $698.53  |
+| Mercury: Electricity - Open Term (Low)            | $720.85  |
+| Electric Kiwi: Kiwi (Low)                         | $724.27  |
+| Frank: Electricity (Low)                          | $735.33  |
+| Flick: Flat (Low)                                 | $736.18  |
+| Flick: Off Peak (Low)                             | $736.98  |
+| Mercury: Electricity - Open Term (Std)            | $737.13  |
+| Electric Kiwi: Prepay 300 (Std)                   | $741.45  |
+| Contact: Electricity - Good Nights (Std)          | $759.88  |
+| Frank: Electricity (Std)                          | $760.83  |
+| Contact: Electricity - Good Weekends (Low)        | $766.98  |
+| Flick: Flat (Std)                                 | $783.71  |
+| Flick: Off Peak (Std)                             | $784.75  |
+| Genesis: Electricity - Energy Plus Bundle (Low)\* | $796.25  |
+| Contact: Electricity - Good Weekends (Std)        | $817.40  |
+| Electric Kiwi: MoveMaster (Low)                   | $835.37  |
+| Genesis: Electricity - Energy Plus Bundle (Std)\* | $839.06  |
+| Genesis: Electricity - Energy Plus (Low)          | $839.53  |
+| Electric Kiwi: MoveMaster (Std)                   | $883.75  |
+| Genesis: Electricity - Energy Plus (Std)          | $884.66  |
+| Electric Kiwi: Kiwi (Std)                         | $1190.51 |
 
 ### Gas Plans
 
-_\* = requires bundle_
-| name | cost |
-| -------------------------------- | ------- |
-| Mercury: Gas - Open Term (Low)\* | $278.74 |
-| Mercury: Gas - Open Term (Std)\* | $282.26 |
-| Contact: Gas - Living Smart | $287.00 |
-| Mercury: Gas - Open Term (Low) | $298.58 |
-| Frank: Piped Gas (Bundled)\* | $303.17 |
-| Genesis: Gas - Energy Plus (Low) | $315.27 |
-| Genesis: Gas - Energy Plus (Std) | $318.46 |
-| Frank: Piped Gas (Unbundled) | $418.21 |
+_Std = Standard Use, Low = Low Use, \* = requires bundle_
+
+| name                                      | cost    |
+| ----------------------------------------- | ------- |
+| Mercury: Gas - Open Term (Low)\*          | $278.74 |
+| Mercury: Gas - Open Term (Std)\*          | $282.26 |
+| Contact: Gas - Living Smart               | $287.00 |
+| Mercury: Gas - Open Term (Low)            | $298.58 |
+| Genesis: Gas - Energy Plus Bundle (Low)\* | $299.01 |
+| Genesis: Gas - Energy Plus Bundle (Std)\* | $302.04 |
+| Frank: Piped Gas (Bundled)\*              | $303.17 |
+| Genesis: Gas - Energy Plus (Low)          | $315.27 |
+| Genesis: Gas - Energy Plus (Std)          | $318.46 |
+| Frank: Piped Gas (Unbundled)              | $418.21 |
 
 ### Internet Plans
 
 _\* = requires bundle_
-| name | cost |
+
+| name                         | cost   |
 | ---------------------------- | ------ |
-| Contact: Fast Fibre\* | $70.00 |
-| Quic: Runner | $79.00 |
+| Contact: Fast Fibre\*        | $70.00 |
+| Quic: Runner                 | $79.00 |
 | Electric Kiwi: Sweet Fibre\* | $79.50 |
-| Mercury: Fibre Classic\* | $91.00 |
+| Mercury: Fibre Classic\*     | $91.00 |
 
 ### Plan Combinations & Provider Bundles
 
-| name          | electricity                              | gas                              | internet                     | cost     |
-| ------------- | ---------------------------------------- | -------------------------------- | ---------------------------- | -------- |
-| Contact       | Contact: Electricity - Good Nights (Low) | Contact: Gas - Living Smart      | Contact: Fast Fibre\*        | $1050.20 |
-| Unbundled     | Contact: Electricity - Good Nights (Low) | Contact: Gas - Living Smart      | Quic: Runner                 | $1059.20 |
-| Electric Kiwi | Electric Kiwi: Prepay 300 (Low)          | Contact: Gas - Living Smart      | Electric Kiwi: Sweet Fibre\* | $1065.03 |
-| Mercury       | Mercury: Electricity - Open Term (Low)   | Mercury: Gas - Open Term (Low)   | Quic: Runner                 | $1078.59 |
-| Frank         | Frank: Electricity (Low)                 | Frank: Piped Gas (Bundled)       | Quic: Runner                 | $1117.50 |
-| Genesis       | Genesis: Electricity - Energy Plus (Low) | Genesis: Gas - Energy Plus (Low) | Quic: Runner                 | $1233.79 |
+The best bundle from each provider + the best combination of unbundled plans
+
+_Std = Standard Use, Low = Low Use, \* = requires bundle_
+
+| name          | electricity                                       | gas                                       | internet                     | cost     |
+| ------------- | ------------------------------------------------- | ----------------------------------------- | ---------------------------- | -------- |
+| Contact       | Contact: Electricity - Good Nights (Low)          | Contact: Gas - Living Smart               | Contact: Fast Fibre\*        | $1050.20 |
+| Unbundled     | Contact: Electricity - Good Nights (Low)          | Contact: Gas - Living Smart               | Quic: Runner                 | $1059.20 |
+| Electric Kiwi | Electric Kiwi: Prepay 300 (Low)                   | Contact: Gas - Living Smart               | Electric Kiwi: Sweet Fibre\* | $1065.03 |
+| Mercury       | Mercury: Electricity - Open Term (Low)            | Mercury: Gas - Open Term (Low)\*          | Quic: Runner                 | $1078.59 |
+| Frank         | Frank: Electricity (Low)                          | Frank: Piped Gas (Bundled)\*              | Quic: Runner                 | $1117.50 |
+| Genesis       | Genesis: Electricity - Energy Plus Bundle (Low)\* | Genesis: Gas - Energy Plus Bundle (Low)\* | Quic: Runner                 | $1174.26 |
 
 ## Dev Notes
 
