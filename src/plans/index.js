@@ -16,6 +16,12 @@ import {
   electricKiwiPrepay300StandardUser,
 } from "./providers/electric-kiwi.js";
 import {
+  flickFlatLow,
+  flickFlatStandard,
+  flickOffPeakLow,
+  flickOffPeakStandard,
+} from "./providers/flick.js";
+import {
   frankGasBundled,
   frankGasUnbundled,
   frankLowUser,
@@ -54,6 +60,10 @@ export const ElectricityPlan = {
   contactGoodNightsStandardUserElectricity,
   contactGoodWeekendsLowUserElectricity,
   contactGoodWeekendsStandardUserElectricity,
+  flickFlatLow,
+  flickFlatStandard,
+  flickOffPeakLow,
+  flickOffPeakStandard,
 };
 
 /** @type {import("./types.js").ElectricityPlan[]}} */
