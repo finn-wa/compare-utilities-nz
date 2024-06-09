@@ -17,7 +17,7 @@ const discount = {
   bundled: (mc) => Math.round(mc * 0.92),
 };
 
-// Standard User
+// Std
 
 export const genesisEnergyPlusStandardUserElectricity = electricityPlan({
   id: "genesisEnergyPlusStandardUserElectricity",
@@ -59,7 +59,7 @@ export const genesisEnergyPlusStandardUserGasBundled = gasPlan({
   bundle: ["electricity"],
 });
 
-// Low User
+// Low Use
 
 export const genesisEnergyPlusLowUserElectricity = electricityPlan({
   id: "genesisEnergyPlusLowUserElectricity",

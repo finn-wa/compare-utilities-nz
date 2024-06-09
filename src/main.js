@@ -83,3 +83,17 @@ function formatPlanName(plan) {
   }
   return name;
 }
+
+/** @param {Record<string, string | number>[]} data */
+function printMarkdownTable(data) {
+  const headers = Object.keys(data[0]);
+
+  let output = `| ${headers.join(" | ")} |\n`;
+  output += `| ${headers.map(() => "---").join(" | ")} |\n`;
+
+  for (const obj of data) {
+    const row = headers.map((header) => obj[header]);
+    output += `| ${row.join(" | ")} |\n`;
+  }
+  console.log(output);
+}
