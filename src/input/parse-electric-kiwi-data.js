@@ -1,0 +1,211 @@
+import { readFileSync, readdirSync } from "fs";
+import { join } from "path";
+import { Temporal } from "temporal-polyfill";
+import { NZT } from "./utils.js";
+
+/**
+ * Reads Electric Kiwi electricity consumption JSON files from the input folder and outputs a formatted usage object.
+ *
+ * @param {string} inputFolder
+ * @returns {import("../calculate-cost.js").UsageDetails}
+ */
+export function getElectricKiwiConsumption(inputFolder = "./data/ek") {
+  const consumptionData = parseConsumptionFiles(inputFolder);
+  return {
+    intervalType: "hourly",
+    usage: getUsageEntriesFromFiles(consumptionData),
+  };
+}
+
+function tallyCost() {
+  // so this doesn't match my calculations
+  // plus hour of power needs to be read from data
+  const consumption = parseConsumptionFiles("./data/ek");
+  let cost = 0;
+  for (const file of consumption) {
+    for (const day in file.data.usage) {
+      cost += parseFloat(file.data.usage[day].total_charges_incl_gst);
+    }
+  }
+  console.log(cost);
+}
+
+// Input file types
+
+/**
+  @typedef {{
+    consumption: string
+    consumption_rate: number
+    hop_best: number
+    hop_interval: number
+    time: string
+  }} UsageInterval
+
+  @typedef {{
+    adjustment_charges_incl_gst: string              
+    bill_consumption: string
+    consumption: string
+    consumption_adjustment: string
+    fixed_charges_excl_gst: string
+    fixed_charges_incl_gst: string
+    intervals: {[intervalNumber: string]: UsageInterval}
+    percent_consumption_adjustment: string
+    range: {
+      end_date: string
+      start_date: string
+    }
+    solar_feed_in_tariffs: number
+    status: string
+    total_charges_incl_gst: string
+    type: string
+    usage_type: string
+  }} DailyUsage
+  
+  @typedef {{
+    group_breakdown: string[]
+    range: {
+      end_date: string
+      group_by: string
+      start_date: string
+    }
+    type: string
+    usage: {[date: string]: DailyUsage }
+  }} ConsumptionData
+
+  @typedef {{
+    data: ConsumptionData
+    status: number
+  }} ElectricKiwiConsumptionJson
+ */
+
+/**
+ * @param {string} dataDir
+ * @returns {ElectricKiwiConsumptionJson[]}
+ */
+function parseConsumptionFiles(dataDir) {
+  console.log("Reading files in " + dataDir);
+  return readdirSync(dataDir)
+    .filter((filename) => filename.endsWith(".json"))
+    .map((filename) => parseConsumptionFile(join(dataDir, filename)))
+    .sort(
+      (a, b) =>
+        Temporal.PlainDate.from(a.data.range.start_date).since(
+          Temporal.PlainDate.from(b.data.range.start_date)
+        ).milliseconds
+    );
+}
+
+/**
+ * @param {string} file the JSON file from the Electric Kiwi API
+ * @returns {ElectricKiwiConsumptionJson}
+ */
+function parseConsumptionFile(file) {
+  console.log("Parsing " + file);
+  return JSON.parse(readFileSync(file, { encoding: "utf8" }));
+}
+
+/**
+ * @param {ElectricKiwiConsumptionJson[]} files
+ * @returns {import("../calculate-cost.js").UsageEntry[]}
+ */
+function getUsageEntriesFromFiles(files) {
+  console.log("Combining usage details from all files");
+  if (files.length === 0) {
+    throw new Error("At least one file is required");
+  }
+
+  let i = 0;
+  let fileData = files[i].data;
+  let lastFileEndDate = parseDate(files[i].data.range.end_date);
+  const allUsage = [...getUsageEntriesFromFile(fileData)];
+
+  for (i = 1; i < files.length; i++) {
+    fileData = files[i].data;
+    const startDate = parseDate(fileData.range.start_date);
+    const timeSinceLastFile = startDate.since(lastFileEndDate).total("day");
+    if (timeSinceLastFile < 1) {
+      continue;
+    } else if (timeSinceLastFile > 1) {
+      throw new Error(
+        `Expected 1 day between files, found ${timeSinceLastFile} (${startDate} - ${lastFileEndDate} )`
+      );
+    }
+    allUsage.push(...getUsageEntriesFromFile(fileData));
+    lastFileEndDate = parseDate(files[i].data.range.end_date);
+  }
+
+  return allUsage;
+}
+
+/**
+ * @param {ConsumptionData} data
+ * @returns {import("../calculate-cost.js").UsageEntry[]}
+ */
+function getUsageEntriesFromFile(data) {
+  return data.group_breakdown.flatMap((day) =>
+    getUsageEntriesFromDay(day, data.usage[day])
+  );
+}
+
+/**
+ * @param {string} date YYYY-MM-DD
+ * @param {DailyUsage} dailyUsage
+ * @returns {import("../calculate-cost.js").UsageEntry[]}
+ */
+function getUsageEntriesFromDay(date, dailyUsage) {
+  const day = Temporal.PlainDate.from(date);
+  const halfHourEntries = Object.keys(dailyUsage.intervals)
+    .map((interval) => {
+      const { time, consumption } = dailyUsage.intervals[interval];
+      const startDate = parseTime(time).toZonedDateTime({
+        plainDate: day,
+        timeZone: NZT,
+      });
+      return { startDate, usage: parseFloat(consumption) };
+    })
+    .sort((a, b) => a.startDate.since(b.startDate).seconds);
+
+  /**@type {import("../calculate-cost.js").UsageEntry[]} */
+  const usageEntries = [];
+  for (let i = 0; i < halfHourEntries.length; i += 2) {
+    const first = halfHourEntries[i];
+    const second = halfHourEntries[i + 1];
+    if (first.startDate.hour !== second.startDate.hour) {
+      throw new Error(
+        `Half-hourly data mismatch: ${first.startDate}, ${second.startDate}`
+      );
+    }
+    usageEntries.push({
+      startDate: first.startDate,
+      usage: first.usage + second.usage,
+    });
+  }
+  return usageEntries;
+}
+
+/**
+ * @param {string} date e.g. 2023-04-10
+ * @returns {Temporal.ZonedDateTime}
+ */
+function parseDate(date) {
+  return Temporal.PlainDate.from(date).toZonedDateTime(NZT);
+}
+
+/**
+ * @param {string} time
+ */
+function parseTime(time) {
+  const [numbers, amPM] = time.split(" ");
+  const [hoursStr, minsStr] = numbers.split(":");
+  /** @type {number} */
+  let hour;
+  if (amPM === "AM") {
+    hour = hoursStr === "12" ? 0 : Number(hoursStr);
+  } else {
+    hour = hoursStr === "12" ? 12 : Number(hoursStr) + 12;
+  }
+  return Temporal.PlainTime.from({
+    hour,
+    minute: Number(minsStr),
+  });
+}
