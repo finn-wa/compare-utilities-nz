@@ -1,10 +1,11 @@
 import { writeFileSync } from "fs";
+/** @import { Day, Rate, HourInterval, ElectricityPlan, PipedGasPlan, InternetPlan, Plan } from "./types.js" */
 
-/** @type {import("./types.js").Day[]} */
+/** @type {Day[]} */
 export const weekdays = [1, 2, 3, 4, 5];
-/** @type {import("./types.js").Day[]} */
+/** @type {Day[]} */
 export const weekends = [6, 7];
-/** @type {import("./types.js").Day[]} */
+/** @type {Day[]} */
 export const daily = [1, 2, 3, 4, 5, 6, 7];
 
 /**
@@ -12,7 +13,7 @@ export const daily = [1, 2, 3, 4, 5, 6, 7];
  *
  * @param {number} start
  * @param {number} end
- * @returns {import("./types.js").HourInterval}
+ * @returns {HourInterval}
  */
 export function hours(start, end) {
   if (start >= end) {
@@ -27,7 +28,7 @@ export function hours(start, end) {
   return { start, end };
 }
 
-/** @type {import("./types.js").HourInterval[]} */
+/** @type {HourInterval[]} */
 export const allDay = [hours(0, 24)];
 
 /**
@@ -35,7 +36,7 @@ export const allDay = [hours(0, 24)];
  * the week.
  *
  * @param {number} millicents price per kwH
- * @returns {import("./types.js").Rate}
+ * @returns {Rate}
  */
 export function dailyRate(millicents) {
   return { days: daily, hours: allDay, millicents };
@@ -62,8 +63,8 @@ export function writeJson(jsonObject, outputPath) {
 
 /**
  * Adds the `type: "electricity"` property
- * @param {Omit<import("./types.js").ElectricityPlan, 'type'>} plan
- * @returns {import("./types.js").ElectricityPlan}
+ * @param {Omit<ElectricityPlan, 'type'>} plan
+ * @returns {ElectricityPlan}
  */
 export function electricityPlan(plan) {
   return { type: "electricity", ...plan };
@@ -71,8 +72,8 @@ export function electricityPlan(plan) {
 
 /**
  * Adds the `type: "gas"` property
- * @param {Omit<import("./types.js").PipedGasPlan, 'type'>} plan
- * @returns {import("./types.js").PipedGasPlan}
+ * @param {Omit<PipedGasPlan, 'type'>} plan
+ * @returns {PipedGasPlan}
  */
 export function gasPlan(plan) {
   return { type: "gas", ...plan };
@@ -80,8 +81,8 @@ export function gasPlan(plan) {
 
 /**
  * Adds the `type: "internet"` property
- * @param {Omit<import("./types.js").InternetPlan, 'type'>} plan
- * @returns {import("./types.js").InternetPlan}
+ * @param {Omit<InternetPlan, 'type'>} plan
+ * @returns {InternetPlan}
  */
 export function internetPlan(plan) {
   return { type: "internet", ...plan };
@@ -114,7 +115,7 @@ export const requireNonEmpty = (arr) => {
 };
 
 /**
- * @param {import("./types.js").Plan} plan
+ * @param {Plan} plan
  * @returns {boolean}
  */
 export function needsBundle(plan) {

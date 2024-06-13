@@ -2,13 +2,14 @@ import { readFileSync, readdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { Temporal } from "temporal-polyfill";
 import { NZT } from "../utils.js";
+/** @import { GasUsage, IntervalType, UsageDetails, UsageEntry } from "../../calculations/cost.js" */
 
 /**
  * Reads Frank electricity usage JSON from the input folder and outputs a formatted usage object.
  *
  * @param {string} inputFolder
- * @param {import("../../calculations/cost.js").IntervalType} intervalType
- * @returns {import("../../calculations/cost.js").UsageDetails}
+ * @param {IntervalType} intervalType
+ * @returns {UsageDetails}
  */
 export function getFrankElectricityUsage(
   inputFolder = "./data/electricity",
@@ -34,7 +35,7 @@ export function getFrankElectricityUsage(
  * @property {string} id e.g. "e11a6eb8404241f57435aaec056cdb8e"
  * @property {string} startDate e.g. "2024-05-20T00:00:00+12:00",
  * @property {string} endDate e.g. "2024-05-20T00:59:59+12:00",
- * @property {import("../../calculations/cost.js").IntervalType} intervalType e.g. "hourly"
+ * @property {IntervalType} intervalType e.g. "hourly"
  */
 /**
  * @typedef FrankSupplyPoint
@@ -80,7 +81,7 @@ export function getFrankElectricityUsage(
 
 /**
  * @param {string} file the JSON file from the Frank API
- * @param {import("../../calculations/cost.js").IntervalType} intervalType the expected interval type
+ * @param {IntervalType} intervalType the expected interval type
  * @returns {FrankElectricityUsageFile}
  */
 function parseFrankElectricityUsageFile(file, intervalType) {
@@ -101,7 +102,7 @@ function parseFrankElectricityUsageFile(file, intervalType) {
 
 /**
  * @param {string} dataDir
- * @param {import("../../calculations/cost.js").IntervalType} intervalType the expected interval type
+ * @param {IntervalType} intervalType the expected interval type
  * @returns {FrankElectricityUsageFile[]}
  */
 function parseFrankElectricityUsageFiles(dataDir, intervalType = "hourly") {
@@ -129,7 +130,7 @@ function parseDate(date) {
 
 /**
  * @param {FrankSupplyPoint} supplyPoint
- * @returns {import("../../calculations/cost.js").UsageEntry[]}
+ * @returns {UsageEntry[]}
  */
 function convertUsageEntries(supplyPoint) {
   return supplyPoint.usage.map((frankUsage) => ({
@@ -140,7 +141,7 @@ function convertUsageEntries(supplyPoint) {
 
 /**
  * @param {FrankElectricityUsageFile[]} files
- * @returns {import("../../calculations/cost.js").UsageEntry[]}
+ * @returns {UsageEntry[]}
  */
 function getUsageEntriesFromFiles(files) {
   console.log("Combining usage details from all files");
@@ -181,7 +182,7 @@ const isNonEmptyEntry = (entry) => entry.type !== "empty";
 
 /**
  * @param {string} file path to JSON usage file
- * @returns {import("../../calculations/cost.js").GasUsage}
+ * @returns {GasUsage}
  */
 export function getFrankGasUsage(file = "./data/gas/2024.json") {
   /** @type {FrankGasUsageFile} */
@@ -209,7 +210,7 @@ function toCsvRow(values) {
 }
 
 /**
- * @param {import("../../calculations/cost.js").UsageEntry[]} rows
+ * @param {UsageEntry[]} rows
  * @returns {string}
  */
 function toCsvString(rows) {
@@ -222,7 +223,7 @@ function toCsvString(rows) {
 }
 
 /**
- * @param {import("../../calculations/cost.js").UsageEntry[]} rows
+ * @param {UsageEntry[]} rows
  * @param {string} outputPath output file path
  */
 function writeCsv(rows, outputPath) {

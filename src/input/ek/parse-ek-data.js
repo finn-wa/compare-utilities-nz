@@ -2,12 +2,13 @@ import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
 import { Temporal } from "temporal-polyfill";
 import { NZT } from "../utils.js";
+/** @import { UsageDetails, UsageEntry } from '../../calculations/cost.js' */
 
 /**
  * Reads Electric Kiwi electricity consumption JSON files from the input folder and outputs a formatted usage object.
  *
  * @param {string} inputFolder
- * @returns {import("../../calculations/cost.js").UsageDetails}
+ * @returns {UsageDetails}
  */
 export function getElectricKiwiConsumption(inputFolder = "./data/ek") {
   const consumptionData = parseConsumptionFiles(inputFolder);
@@ -106,7 +107,7 @@ function parseConsumptionFile(file) {
 
 /**
  * @param {ElectricKiwiConsumptionJson[]} files
- * @returns {import("../../calculations/cost.js").UsageEntry[]}
+ * @returns {UsageEntry[]}
  */
 function getUsageEntriesFromFiles(files) {
   console.log("Combining usage details from all files");
@@ -139,7 +140,7 @@ function getUsageEntriesFromFiles(files) {
 
 /**
  * @param {ConsumptionData} data
- * @returns {import("../../calculations/cost.js").UsageEntry[]}
+ * @returns {UsageEntry[]}
  */
 function getUsageEntriesFromFile(data) {
   return data.group_breakdown.flatMap((day) =>
@@ -150,7 +151,7 @@ function getUsageEntriesFromFile(data) {
 /**
  * @param {string} date YYYY-MM-DD
  * @param {DailyUsage} dailyUsage
- * @returns {import("../../calculations/cost.js").UsageEntry[]}
+ * @returns {UsageEntry[]}
  */
 function getUsageEntriesFromDay(date, dailyUsage) {
   const day = Temporal.PlainDate.from(date);
@@ -165,7 +166,7 @@ function getUsageEntriesFromDay(date, dailyUsage) {
     })
     .sort((a, b) => a.startDate.since(b.startDate).seconds);
 
-  /**@type {import("../../calculations/cost.js").UsageEntry[]} */
+  /**@type {UsageEntry[]} */
   const usageEntries = [];
   for (let i = 0; i < halfHourEntries.length; i += 2) {
     const first = halfHourEntries[i];

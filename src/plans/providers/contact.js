@@ -8,10 +8,11 @@ import {
   internetPlan,
   weekends,
 } from "../utils.js";
+/** @import { ElectricityPlan, Rate } from "../types.js" */
 
 const provider = "Contact";
 
-/** @type {Object.<string, import("../types.js").Rate>} */
+/** @type {Object.<string, Rate>} */
 const rates = {
   standardUserDaily: dailyRate(21_574),
   lowUserDaily: dailyRate(27_669),
@@ -50,14 +51,14 @@ const contactLowUserElectricity = electricityPlan({
 });
 
 // Good Weekends
-/** @type {import("../types.js").ElectricityPlan} */
+/** @type {ElectricityPlan} */
 export const contactGoodWeekendsStandardUserElectricity = {
   ...contactStandardUserElectricity,
   id: "contactGoodWeekendsStandardUserElectricity",
   name: "Electricity - Good Weekends",
   rates: [rates.standardUserDaily, rates.goodWeekends],
 };
-/** @type {import("../types.js").ElectricityPlan} */
+/** @type {ElectricityPlan} */
 export const contactGoodWeekendsLowUserElectricity = {
   ...contactLowUserElectricity,
   id: "contactGoodWeekendsLowUserElectricity",
@@ -66,14 +67,14 @@ export const contactGoodWeekendsLowUserElectricity = {
 };
 
 // Good Nights
-/** @type {import("../types.js").ElectricityPlan} */
+/** @type {ElectricityPlan} */
 export const contactGoodNightsStandardUserElectricity = {
   ...contactStandardUserElectricity,
   id: "contactGoodNightsStandardUserElectricity",
   name: "Electricity - Good Nights",
   rates: [rates.standardUserDaily, rates.goodNights],
 };
-/** @type {import("../types.js").ElectricityPlan} */
+/** @type {ElectricityPlan} */
 export const contactGoodNightsLowUserElectricity = {
   ...contactLowUserElectricity,
   id: "contactGoodNightsLowUserElectricity",

@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "@types/node": "20",
-    "typescript": "^5.4.5"
+    "typescript": "5.5.1-rc"
   },
   "dependencies": {
     "temporal-polyfill": "^0.2.5"

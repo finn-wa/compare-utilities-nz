@@ -7,6 +7,8 @@ import {
   getFrankGasUsage,
 } from "./input/frank/parse-frank-data.js";
 import { needsBundle } from "./plans/utils.js";
+/** @import {UtilityUsage} from "./calculations/cost.js" */
+/** @import {Plan} from './plans/types.js' */
 
 const usage = {
   electricity: getFrankElectricityUsage(),
@@ -16,7 +18,7 @@ printIndividualComparison(usage);
 printCombinedComparison(usage);
 
 /**
- * @param {import("./calculations/cost.js").UtilityUsage} usage
+ * @param {UtilityUsage} usage
  */
 function printCombinedComparison(usage) {
   const plans = comparePlanCombinations(usage);
@@ -37,7 +39,7 @@ function printCombinedComparison(usage) {
 
 /**
  *
- * @param {import("./calculations/cost.js").UtilityUsage} usage
+ * @param {UtilityUsage} usage
  */
 function printIndividualComparison(usage) {
   const plansByType = comparePlansIndividually(usage);
@@ -83,7 +85,7 @@ function mcTo$(mc) {
 }
 
 /**
- * @param {import("./plans/types.js").Plan} plan
+ * @param {Plan} plan
  * @returns {string}
  */
 function formatPlanName(plan) {

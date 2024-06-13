@@ -1,6 +1,7 @@
 import { Temporal } from "temporal-polyfill";
 import { ElectricityPlans, GasPlans, InternetPlans } from "../plans/index.js";
 import { needsBundle, pp, requireNonEmpty } from "../plans/utils.js";
+/** @import { Plan, Rate, ElectricityPlan, PipedGasPlan, InternetPlan } from '../plans/types.js' */
 
 /**
  * @typedef UsageEntry
@@ -24,14 +25,14 @@ import { needsBundle, pp, requireNonEmpty } from "../plans/utils.js";
 
 /**
  * Returns the rate with the lowest millicent value.
- * @param {import("../plans/types.js").Rate[]} rates a non-empty array of rates
- * @returns {import("../plans/types.js").Rate} the best rate
+ * @param {Rate[]} rates a non-empty array of rates
+ * @returns {Rate} the best rate
  */
 function getBestRate(rates) {
   if (rates.length === 1) {
     return rates[0];
   }
-  /** @type {(import("../plans/types.js").Rate | null)} */
+  /** @type {(Rate | null)} */
   let bestRate = null;
   for (const rate of rates) {
     if (bestRate === null || rate.millicents < bestRate.millicents) {
@@ -45,7 +46,7 @@ function getBestRate(rates) {
 }
 
 /**
- * @param {import("../plans/types.js").ElectricityPlan} plan
+ * @param {ElectricityPlan} plan
  * @param {UsageEntry} entry
  * @returns {number} cost in millicents
  */
@@ -105,7 +106,7 @@ function getTotalDays(intervalType, usage) {
 
 /**
  * @param {UsageDetails} usageDetails
- * @param {import("../plans/types.js").ElectricityPlan} plan
+ * @param {ElectricityPlan} plan
  * @param {boolean} hypothetically use usageFraction on rates if present
  * @returns {number} cost in millicents
  */
@@ -141,7 +142,7 @@ export function calculateElectricityPlanCost(
 
 /**
  * @param {GasUsage} gasUsage
- * @param {import("../plans/types.js").PipedGasPlan} plan
+ * @param {PipedGasPlan} plan
  */
 export function calculateGasPlanCost(gasUsage, plan) {
   const days = gasUsage.endDate.since(gasUsage.startDate).total("days");
@@ -185,17 +186,17 @@ export function comparePlansIndividually(usage) {
 /**
  * @typedef PlanOptions
  * @type {object}
- * @property {import("../plans/types.js").ElectricityPlan[]} [electricity]
- * @property {import("../plans/types.js").PipedGasPlan[]} [gas]
- * @property {import("../plans/types.js").InternetPlan[]} [internet]
+ * @property {ElectricityPlan[]} [electricity]
+ * @property {PipedGasPlan[]} [gas]
+ * @property {InternetPlan[]} [internet]
  */
 /**
  * @typedef PlanSelection
  * @type {object}
  * @property {string} name
- * @property {{plan: import("../plans/types.js").ElectricityPlan, cost: number}} electricity
- * @property {{plan: import("../plans/types.js").PipedGasPlan, cost: number}} gas
- * @property {{plan: import("../plans/types.js").InternetPlan, cost: number}} internet
+ * @property {{plan: ElectricityPlan, cost: number}} electricity
+ * @property {{plan: PipedGasPlan, cost: number}} gas
+ * @property {{plan: InternetPlan, cost: number}} internet
  * @property {number} total total cost
  */
 

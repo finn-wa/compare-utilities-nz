@@ -99,7 +99,7 @@ For context, I love TypeScript but the tooling gets me down.
 - Verbose function parameter/return type syntax.
   I really missed the TypeScript inline types here.
 - The editor actions are lacking - you can't automate adding type definitions using inference like you can when writing in a .ts file.
-- No easy way to add types from another file like a top-level import - types are automatically imported on every reference
+- ~~No easy way to add types from another file like a top-level import - types are automatically imported on every reference~~ This is addressed in TypeScript 5.5!
   You really have to hold the compiler's hand on strict mode, often with more verbosity and if-checks than is strictly necessary.
 - No `extends` - the TS compiler doesn't seem to understand the jsdoc `@extends` keyword, the only workaround is to use `&` which is not quite the same.
 - No way to tell the TS compiler to chill out - no `as Type`, no `!` suffix.
