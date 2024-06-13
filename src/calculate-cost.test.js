@@ -1,23 +1,26 @@
 import assert from "node:assert";
 import test, { describe } from "node:test";
 import { Temporal } from "temporal-polyfill";
-import { calculateHourlyUsageEntryCost } from "./calculate-cost.js";
+import {
+  calculateElectricityPlanCost,
+  calculateHourlyUsageEntryCost,
+} from "./calculate-cost.js";
 import { ElectricityPlan } from "./plans/index.js";
+import { dailyRate, electricityPlan, mcTo$ } from "./plans/utils.js";
+import { getFrankElectricityUsage } from "./parse-data.js";
 
-const usageWithCostFrank = {
-  intervalType: "hourly",
-  usage: [
-    { startDate: "2024-04-20T00:00:00+12:00", cost: 0.188692, usage: 0.61 },
-    { startDate: "2024-04-20T01:00:00+12:00", cost: 0.151984, usage: 0.47 },
-    { startDate: "2024-04-20T02:00:00+12:00", cost: 0.149362, usage: 0.46 },
-    { startDate: "2024-04-20T03:00:00+12:00", cost: 0.154606, usage: 0.48 },
-    { startDate: "2024-04-20T04:00:00+12:00", cost: 0.149362, usage: 0.46 },
-    { startDate: "2024-04-20T05:00:00+12:00", cost: 0.175582, usage: 0.56 },
-  ],
-};
+const dailyRatePlan = electricityPlan({
+  id: "frankLowUser",
+  provider: "Frank",
+  name: "Electricity",
+  variant: "Low",
+  dailyMillicents: 69_000,
+  bundle: [],
+  rates: [dailyRate(26_220)],
+});
 
 describe("calculateHourlyUsageEntryCost", () => {
-  test("with frank plan", () => {
+  test("with daily rate", () => {
     const cost = calculateHourlyUsageEntryCost(
       {
         startDate: Temporal.ZonedDateTime.from(
@@ -25,11 +28,44 @@ describe("calculateHourlyUsageEntryCost", () => {
         ),
         usage: 0.61,
       },
-      ElectricityPlan.frankLowUser
+      dailyRatePlan
     );
-    assert.strictEqual(
-      cost,
-      Math.round(0.61 * ElectricityPlan.frankLowUser.rates[0].millicents)
+    assert.strictEqual(mcTo$(cost), 0.19);
+  });
+});
+
+describe("calculateElectricityPlanCost", () => {
+  const intervalType = "hourly";
+
+  function getAprilUsage() {
+    const { usage } = getFrankElectricityUsage("./data/test", intervalType);
+    const april = Temporal.ZonedDateTime.from(
+      "2024-04-01T00:00:00[Pacific/Auckland]"
     );
+    const may = Temporal.ZonedDateTime.from(
+      "2024-05-01T00:00:00[Pacific/Auckland]"
+    );
+    const startIndex = usage.findIndex(
+      (i) => i.startDate.since(april).total("seconds") >= 0
+    );
+    const endIndex = usage.findIndex(
+      (i) => i.startDate.since(may).total("seconds") >= 0
+    );
+    console.log({ startIndex, endIndex });
+    return usage.slice(startIndex + 1, endIndex);
+  }
+
+  test("daily rate with 1 month of data", () => {
+    const usage = getAprilUsage();
+    console.log(usage[0].startDate.toString());
+    console.log(usage[usage.length - 1].startDate.toString());
+    const totalKw = usage.reduce((acc, entry) => acc + entry.usage, 0);
+    // assert.strictEqual(totalKw.toFixed(2), "609.24");
+    const cost = calculateElectricityPlanCost(
+      { intervalType, usage },
+      dailyRatePlan
+    );
+    // 609.72;
+    assert.strictEqual(mcTo$(cost), 180.44);
   });
 });

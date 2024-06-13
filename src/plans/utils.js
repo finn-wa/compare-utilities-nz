@@ -96,6 +96,15 @@ export function $ToMc(dollars) {
   return dollars * 100_000;
 }
 
+/**
+ * Converts millicents to dollars (2 d.p.)
+ * @param {number} mc millicent value
+ * @returns {number} dollar value
+ */
+export function mcTo$(mc) {
+  return Number((mc / 100_000).toFixed(2));
+}
+
 /** @type {<T extends any[]> (arr: T | null | undefined) => T} */
 export const requireNonEmpty = (arr) => {
   if (arr == null || arr.length === 0) {

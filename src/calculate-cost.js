@@ -92,7 +92,7 @@ function getTotalDays(intervalType, usage) {
 export function calculateElectricityPlanCost(
   { intervalType, usage },
   plan,
-  hypothetically
+  hypothetically = false
 ) {
   if (hypothetically && plan.rates.some((rate) => rate.usageFraction != null)) {
     const totalUsage = usage.reduce((acc, entry) => acc + entry.usage, 0);
