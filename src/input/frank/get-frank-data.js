@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { Temporal } from "temporal-polyfill";
-import { writeJson } from "./plans/utils.js";
+import { writeJson } from "../../plans/utils.js";
 
 await getFrankHourlyElectricityData();
 
@@ -33,7 +33,7 @@ async function getFrankHourlyElectricityData() {
 /**
  * @param {{ startDate: string; endDate: string;  intervalType: string; }} body
  * @param {string} authorization
- * @returns {Promise<import("./parse-data.js").FrankElectricityUsageFile>}
+ * @returns {Promise<import("./parse-frank-data.js").FrankElectricityUsageFile>}
  */
 async function requestUsage(body, authorization) {
   const bodyStr = JSON.stringify(body);

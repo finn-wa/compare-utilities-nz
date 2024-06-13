@@ -14,15 +14,13 @@ const peak = {
   name: "Peak",
   days: weekdays,
   hours: [hours(7, 9), hours(17, 21)],
-  usageFraction: 0.2848,
 };
 const hourOfPower = {
   name: "Hour of Power",
   days: daily,
-  hours: [hours(21, 22)],
+  hours: [hours(15, 16)],
   millicents: 0,
   special: true,
-  usageFraction: 0.103,
 };
 
 const moveMasterSchedule = {
@@ -31,19 +29,16 @@ const moveMasterSchedule = {
     name: "Off-peak shoulder (weekdays)",
     days: weekdays,
     hours: [hours(9, 17), hours(21, 23)],
-    usageFraction: 0.2782,
   },
   shoulderWeekends: {
     name: "Off-peak shoulder (weekends)",
     days: weekends,
     hours: [hours(7, 23)],
-    usageFraction: 0.1,
   },
   offPeakNight: {
     name: "Off-peak night",
     days: daily,
     hours: [hours(23, 24), hours(0, 7)],
-    usageFraction: 0.2339,
   },
 };
 
@@ -53,13 +48,11 @@ const standardSchedule = {
     name: "Off-peak (weekdays)",
     days: weekdays,
     hours: [hours(9, 17), hours(21, 24), hours(0, 7)],
-    usageFraction: 0.2782,
   },
   offPeakWeekends: {
     name: "Off-peak (weekends)",
     days: weekends,
     hours: allDay,
-    usageFraction: 0.3339,
   },
 };
 

@@ -1,9 +1,11 @@
 import {
   comparePlanCombinations,
   comparePlansIndividually,
-} from "./calculate-cost.js";
-import { getFrankElectricityUsage, getFrankGasUsage } from "./parse-data.js";
-import { InternetPlans } from "./plans/index.js";
+} from "./calculations/cost.js";
+import {
+  getFrankElectricityUsage,
+  getFrankGasUsage,
+} from "./input/frank/parse-frank-data.js";
 import { needsBundle } from "./plans/utils.js";
 
 const usage = {
@@ -14,7 +16,7 @@ printIndividualComparison(usage);
 printCombinedComparison(usage);
 
 /**
- * @param {import("./calculate-cost.js").UtilityUsage} usage
+ * @param {import("./calculations/cost.js").UtilityUsage} usage
  */
 function printCombinedComparison(usage) {
   const plans = comparePlanCombinations(usage);
@@ -35,36 +37,40 @@ function printCombinedComparison(usage) {
 
 /**
  *
- * @param {import("./calculate-cost.js").UtilityUsage} usage
+ * @param {import("./calculations/cost.js").UtilityUsage} usage
  */
 function printIndividualComparison(usage) {
-  const { gas, electricity } = comparePlansIndividually(usage);
-  console.log("Electricity Plans");
-  console.log("Std = Standard Use, Low = Low Use, * = requires bundle");
-  console.table(
-    electricity.map(({ plan, cost }) => ({
-      name: formatPlanName(plan),
-      cost: mcTo$(cost),
-    }))
-  );
-  console.log("Gas Plans");
-  console.log("Std = Standard Use, Low = Low Use, * = requires bundle");
-  console.table(
-    gas.map(({ plan, cost }) => ({
-      name: formatPlanName(plan),
-      cost: mcTo$(cost),
-    }))
-  );
-  console.log("Internet Plans");
-  console.log("* = requires bundle");
-  console.table(
-    InternetPlans.sort((a, b) => a.monthlyMillicents - b.monthlyMillicents).map(
-      (plan) => ({
+  const plansByType = comparePlansIndividually(usage);
+  if (plansByType.electricity) {
+    console.log("Electricity Plans");
+    console.log("Std = Standard Use, Low = Low Use, * = requires bundle");
+    console.table(
+      plansByType.electricity.map(({ plan, cost }) => ({
+        name: formatPlanName(plan),
+        cost: mcTo$(cost),
+      }))
+    );
+  }
+  if (plansByType.gas) {
+    console.log("Gas Plans");
+    console.log("Std = Standard Use, Low = Low Use, * = requires bundle");
+    console.table(
+      plansByType.gas.map(({ plan, cost }) => ({
+        name: formatPlanName(plan),
+        cost: mcTo$(cost),
+      }))
+    );
+  }
+  if (plansByType.internet) {
+    console.log("Internet Plans");
+    console.log("* = requires bundle");
+    console.table(
+      plansByType.internet.map((plan) => ({
         name: formatPlanName(plan),
         cost: mcTo$(plan.monthlyMillicents),
-      })
-    )
-  );
+      }))
+    );
+  }
 }
 
 /**

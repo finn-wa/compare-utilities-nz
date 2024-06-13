@@ -1,13 +1,14 @@
 import { readFileSync, readdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { Temporal } from "temporal-polyfill";
+import { NZT } from "../utils.js";
 
 /**
  * Reads Frank electricity usage JSON from the input folder and outputs a formatted usage object.
  *
  * @param {string} inputFolder
- * @param {IntervalType} intervalType
- * @returns {UsageDetails}
+ * @param {import("../../calculations/cost.js").IntervalType} intervalType
+ * @returns {import("../../calculations/cost.js").UsageDetails}
  */
 export function getFrankElectricityUsage(
   inputFolder = "./data/electricity",
@@ -24,7 +25,6 @@ export function getFrankElectricityUsage(
 }
 
 // Input file types
-/** @typedef {('hourly'|'daily'|'monthly')} IntervalType */
 // Electricity
 /**
  * @typedef FrankElectricityUsage
@@ -34,7 +34,7 @@ export function getFrankElectricityUsage(
  * @property {string} id e.g. "e11a6eb8404241f57435aaec056cdb8e"
  * @property {string} startDate e.g. "2024-05-20T00:00:00+12:00",
  * @property {string} endDate e.g. "2024-05-20T00:59:59+12:00",
- * @property {IntervalType} intervalType e.g. "hourly"
+ * @property {import("../../calculations/cost.js").IntervalType} intervalType e.g. "hourly"
  */
 /**
  * @typedef FrankSupplyPoint
@@ -78,30 +78,9 @@ export function getFrankElectricityUsage(
  * @property {GasConsumptionEntry[]} consumptionList
  */
 
-// Output types
-/**
- * @typedef UsageEntry
- * @type {object}
- * @property {Temporal.ZonedDateTime} startDate the start time
- * @property {number} usage usage in kwH
- */
-/**
- * @typedef UsageDetails
- * @type {object}
- * @property {IntervalType} intervalType the period of time between usage entries
- * @property {UsageEntry[]} usage usage in chronological order
- 
-/**
- * @typedef GasUsage
- * @type {object}
- * @property {Temporal.ZonedDateTime} startDate
- * @property {Temporal.ZonedDateTime} endDate
- * @property {number} usage usage in kwH
- */
-
 /**
  * @param {string} file the JSON file from the Frank API
- * @param {IntervalType} intervalType the expected interval type
+ * @param {import("../../calculations/cost.js").IntervalType} intervalType the expected interval type
  * @returns {FrankElectricityUsageFile}
  */
 function parseFrankElectricityUsageFile(file, intervalType) {
@@ -122,7 +101,7 @@ function parseFrankElectricityUsageFile(file, intervalType) {
 
 /**
  * @param {string} dataDir
- * @param {IntervalType} intervalType the expected interval type
+ * @param {import("../../calculations/cost.js").IntervalType} intervalType the expected interval type
  * @returns {FrankElectricityUsageFile[]}
  */
 function parseFrankElectricityUsageFiles(dataDir, intervalType = "hourly") {
@@ -140,19 +119,17 @@ function parseFrankElectricityUsageFiles(dataDir, intervalType = "hourly") {
     );
 }
 
-const tz = Temporal.TimeZone.from("Pacific/Auckland");
-
 /**
  * @param {string} date
  * @returns {Temporal.ZonedDateTime}
  */
 function parseDate(date) {
-  return Temporal.PlainDateTime.from(date).toZonedDateTime(tz);
+  return Temporal.PlainDateTime.from(date).toZonedDateTime(NZT);
 }
 
 /**
  * @param {FrankSupplyPoint} supplyPoint
- * @returns {UsageEntry[]}
+ * @returns {import("../../calculations/cost.js").UsageEntry[]}
  */
 function convertUsageEntries(supplyPoint) {
   return supplyPoint.usage.map((frankUsage) => ({
@@ -163,7 +140,7 @@ function convertUsageEntries(supplyPoint) {
 
 /**
  * @param {FrankElectricityUsageFile[]} files
- * @returns {UsageEntry[]}
+ * @returns {import("../../calculations/cost.js").UsageEntry[]}
  */
 function getUsageEntriesFromFiles(files) {
   console.log("Combining usage details from all files");
@@ -204,7 +181,7 @@ const isNonEmptyEntry = (entry) => entry.type !== "empty";
 
 /**
  * @param {string} file path to JSON usage file
- * @returns {GasUsage}
+ * @returns {import("../../calculations/cost.js").GasUsage}
  */
 export function getFrankGasUsage(file = "./data/gas/2024.json") {
   /** @type {FrankGasUsageFile} */
@@ -232,7 +209,7 @@ function toCsvRow(values) {
 }
 
 /**
- * @param {UsageEntry[]} rows
+ * @param {import("../../calculations/cost.js").UsageEntry[]} rows
  * @returns {string}
  */
 function toCsvString(rows) {
@@ -245,7 +222,7 @@ function toCsvString(rows) {
 }
 
 /**
- * @param {UsageEntry[]} rows
+ * @param {import("../../calculations/cost.js").UsageEntry[]} rows
  * @param {string} outputPath output file path
  */
 function writeCsv(rows, outputPath) {

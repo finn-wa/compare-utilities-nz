@@ -1,17 +1,37 @@
 import { Temporal } from "temporal-polyfill";
-import { ElectricityPlans, GasPlans, InternetPlans } from "./plans/index.js";
-import { needsBundle, pp, requireNonEmpty } from "./plans/utils.js";
+import { ElectricityPlans, GasPlans, InternetPlans } from "../plans/index.js";
+import { needsBundle, pp, requireNonEmpty } from "../plans/utils.js";
+
+/**
+ * @typedef UsageEntry
+ * @type {object}
+ * @property {Temporal.ZonedDateTime} startDate the start time
+ * @property {number} usage usage in kwH
+ */
+/** @typedef {('hourly'|'daily'|'monthly')} IntervalType */
+/**
+ * @typedef UsageDetails
+ * @type {object}
+ * @property {IntervalType} intervalType the period of time between usage entries
+ * @property {UsageEntry[]} usage usage in chronological order
+ /**
+ * @typedef GasUsage
+ * @type {object}
+ * @property {Temporal.ZonedDateTime} startDate
+ * @property {Temporal.ZonedDateTime} endDate
+ * @property {number} usage usage in kwH
+ */
 
 /**
  * Returns the rate with the lowest millicent value.
- * @param {import("./plans/types.js").Rate[]} rates a non-empty array of rates
- * @returns {import("./plans/types.js").Rate} the best rate
+ * @param {import("../plans/types.js").Rate[]} rates a non-empty array of rates
+ * @returns {import("../plans/types.js").Rate} the best rate
  */
 function getBestRate(rates) {
   if (rates.length === 1) {
     return rates[0];
   }
-  /** @type {(import("./plans/types.js").Rate | null)} */
+  /** @type {(import("../plans/types.js").Rate | null)} */
   let bestRate = null;
   for (const rate of rates) {
     if (bestRate === null || rate.millicents < bestRate.millicents) {
@@ -25,8 +45,8 @@ function getBestRate(rates) {
 }
 
 /**
- * @param {import("./plans/types.js").ElectricityPlan} plan
- * @param {import("./parse-data.js").UsageEntry} entry
+ * @param {import("../plans/types.js").ElectricityPlan} plan
+ * @param {UsageEntry} entry
  * @returns {number} cost in millicents
  */
 export function calculateHourlyUsageEntryCost(entry, plan) {
@@ -60,8 +80,8 @@ export function calculateHourlyUsageEntryCost(entry, plan) {
 /**
  * Returns the number of days covered by the usage entries.
  *
- * @param {import("./parse-data.js").IntervalType} intervalType
- * @param {import("./parse-data.js").UsageEntry[]} usage entries in chronological order
+ * @param {IntervalType} intervalType
+ * @param {UsageEntry[]} usage entries in chronological order
  */
 function getTotalDays(intervalType, usage) {
   const startDate = usage.at(0)?.startDate;
@@ -84,8 +104,8 @@ function getTotalDays(intervalType, usage) {
 }
 
 /**
- * @param {import("./parse-data.js").UsageDetails} usageDetails
- * @param {import("./plans/types.js").ElectricityPlan} plan
+ * @param {UsageDetails} usageDetails
+ * @param {import("../plans/types.js").ElectricityPlan} plan
  * @param {boolean} hypothetically use usageFraction on rates if present
  * @returns {number} cost in millicents
  */
@@ -120,8 +140,8 @@ export function calculateElectricityPlanCost(
 }
 
 /**
- * @param {import("./parse-data.js").GasUsage} gasUsage
- * @param {import("./plans/types.js").PipedGasPlan} plan
+ * @param {GasUsage} gasUsage
+ * @param {import("../plans/types.js").PipedGasPlan} plan
  */
 export function calculateGasPlanCost(gasUsage, plan) {
   const days = gasUsage.endDate.since(gasUsage.startDate).total("days");
@@ -132,8 +152,8 @@ export function calculateGasPlanCost(gasUsage, plan) {
 
 /**
   @typedef {{
-    electricity: import("./parse-data.js").UsageDetails,
-    gas: import("./parse-data.js").GasUsage,
+    electricity: UsageDetails,
+    gas: GasUsage,
   }} UtilityUsage 
 */
 
@@ -141,31 +161,41 @@ export function calculateGasPlanCost(gasUsage, plan) {
  * @param {UtilityUsage} usage
  */
 export function comparePlansIndividually(usage) {
-  const electricity = ElectricityPlans.map((plan) => ({
-    plan,
-    cost: calculateElectricityPlanCost(usage.electricity, plan, true),
-  })).sort((a, b) => a.cost - b.cost);
-  const gas = GasPlans.map((plan) => ({
-    plan,
-    cost: calculateGasPlanCost(usage.gas, plan),
-  })).sort((a, b) => a.cost - b.cost);
-  return { electricity, gas };
+  let plansByType = {};
+  const electricityUsage = usage.electricity;
+  if (electricityUsage != null) {
+    plansByType.electricity = ElectricityPlans.map((plan) => ({
+      plan,
+      cost: calculateElectricityPlanCost(electricityUsage, plan, true),
+    })).sort((a, b) => a.cost - b.cost);
+  }
+  const gasUsage = usage.gas;
+  if (gasUsage) {
+    plansByType.gas = GasPlans.map((plan) => ({
+      plan,
+      cost: calculateGasPlanCost(gasUsage, plan),
+    })).sort((a, b) => a.cost - b.cost);
+  }
+  plansByType.internet = InternetPlans.sort(
+    (a, b) => a.monthlyMillicents - b.monthlyMillicents
+  );
+  return plansByType;
 }
 
 /**
  * @typedef PlanOptions
  * @type {object}
- * @property {import("./plans/types.js").ElectricityPlan[]} [electricity]
- * @property {import("./plans/types.js").PipedGasPlan[]} [gas]
- * @property {import("./plans/types.js").InternetPlan[]} [internet]
+ * @property {import("../plans/types.js").ElectricityPlan[]} [electricity]
+ * @property {import("../plans/types.js").PipedGasPlan[]} [gas]
+ * @property {import("../plans/types.js").InternetPlan[]} [internet]
  */
 /**
  * @typedef PlanSelection
  * @type {object}
  * @property {string} name
- * @property {{plan: import("./plans/types.js").ElectricityPlan, cost: number}} electricity
- * @property {{plan: import("./plans/types.js").PipedGasPlan, cost: number}} gas
- * @property {{plan: import("./plans/types.js").InternetPlan, cost: number}} internet
+ * @property {{plan: import("../plans/types.js").ElectricityPlan, cost: number}} electricity
+ * @property {{plan: import("../plans/types.js").PipedGasPlan, cost: number}} gas
+ * @property {{plan: import("../plans/types.js").InternetPlan, cost: number}} internet
  * @property {number} total total cost
  */
 
