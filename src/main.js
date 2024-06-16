@@ -1,17 +1,21 @@
 import {
+  calculatePlanUsageCostBreakdown,
   comparePlanCombinations,
   comparePlansIndividually,
 } from "./calculations/cost.js";
+import { calculateUsageDetails } from "./calculations/usage.js";
 import {
   getFrankElectricityUsage,
   getFrankGasUsage,
 } from "./input/frank/parse-frank-data.js";
 import { needsBundle } from "./plans/utils.js";
 /** @import {UtilityUsage} from "./calculations/cost.js" */
+/** @import {PlanUsageCostBreakdown} from "./calculations/types.js" */
 /** @import {Plan} from './plans/types.js' */
 
+const eletricityUsage = getFrankElectricityUsage();
 const usage = {
-  electricity: getFrankElectricityUsage(),
+  electricity: calculateUsageDetails(eletricityUsage.usage),
   gas: getFrankGasUsage(),
 };
 printIndividualComparison(usage);
@@ -47,9 +51,15 @@ function printIndividualComparison(usage) {
     console.log("Electricity Plans");
     console.log("Std = Standard Use, Low = Low Use, * = requires bundle");
     console.table(
-      plansByType.electricity.map(({ plan, cost }) => ({
-        name: formatPlanName(plan),
-        cost: mcTo$(cost),
+      plansByType.electricity.map((x) => ({
+        name: formatPlanName(x.plan),
+        cost: mcTo$(x.totalCost),
+        "variable cost": pc(x.variableCost, x.totalCost),
+        rates: formatRateBreakdown(
+          x.rateBreakdown,
+          x.variableCost,
+          x.usageDetails.totalUsage
+        ),
       }))
     );
   }
@@ -111,4 +121,30 @@ function printMarkdownTable(data) {
     output += `| ${row.join(" | ")} |\n`;
   }
   console.log(output);
+}
+
+/**
+ * @param {number} numerator
+ * @param {number} denominator
+ * @returns {string} formatted as a percentage
+ */
+function pc(numerator, denominator) {
+  return Math.round((numerator / denominator) * 100) + "%";
+}
+
+/**
+ * @param {PlanUsageCostBreakdown['rateBreakdown']} rateBreakdown
+ * @param {number} variableCost
+ * @param {number} totalUsage
+
+ * @returns {string}
+ */
+function formatRateBreakdown(rateBreakdown, variableCost, totalUsage) {
+  return Object.entries(rateBreakdown)
+    .sort(([_, a], [__, b]) => b.usage - a.usage)
+    .map(
+      ([rate, { usage, cost }]) =>
+        rate + ` (${pc(usage, totalUsage)} 🗲, ${pc(cost, variableCost)} $)`
+    )
+    .join("; ");
 }

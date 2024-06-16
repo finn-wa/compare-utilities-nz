@@ -2,14 +2,14 @@ import { readFileSync, readdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { Temporal } from "temporal-polyfill";
 import { NZT } from "../utils.js";
-/** @import { GasUsage, IntervalType, UsageDetails, UsageEntry } from "../../calculations/cost.js" */
+/** @import { GasUsage, IntervalType, UsageEntries, UsageEntry } from "../../calculations/types.js" */
 
 /**
  * Reads Frank electricity usage JSON from the input folder and outputs a formatted usage object.
  *
  * @param {string} inputFolder
  * @param {IntervalType} intervalType
- * @returns {UsageDetails}
+ * @returns {UsageEntries}
  */
 export function getFrankElectricityUsage(
   inputFolder = "./data/electricity",

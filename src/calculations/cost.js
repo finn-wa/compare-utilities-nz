@@ -1,143 +1,76 @@
 import { Temporal } from "temporal-polyfill";
 import { ElectricityPlans, GasPlans, InternetPlans } from "../plans/index.js";
-import { needsBundle, pp, requireNonEmpty } from "../plans/utils.js";
+import {
+  daily,
+  getRateForTime,
+  needsBundle,
+  pp,
+  requireNonEmpty,
+} from "../plans/utils.js";
+import { calculateUsageDetails, getTotalDays } from "./usage.js";
 /** @import { Plan, Rate, ElectricityPlan, PipedGasPlan, InternetPlan } from '../plans/types.js' */
-
-/**
- * @typedef UsageEntry
- * @type {object}
- * @property {Temporal.ZonedDateTime} startDate the start time
- * @property {number} usage usage in kwH
- */
-/** @typedef {('hourly'|'daily'|'monthly')} IntervalType */
-/**
- * @typedef UsageDetails
- * @type {object}
- * @property {IntervalType} intervalType the period of time between usage entries
- * @property {UsageEntry[]} usage usage in chronological order
- /**
- * @typedef GasUsage
- * @type {object}
- * @property {Temporal.ZonedDateTime} startDate
- * @property {Temporal.ZonedDateTime} endDate
- * @property {number} usage usage in kwH
- */
-
-/**
- * Returns the rate with the lowest millicent value.
- * @param {Rate[]} rates a non-empty array of rates
- * @returns {Rate} the best rate
- */
-function getBestRate(rates) {
-  if (rates.length === 1) {
-    return rates[0];
-  }
-  /** @type {(Rate | null)} */
-  let bestRate = null;
-  for (const rate of rates) {
-    if (bestRate === null || rate.millicents < bestRate.millicents) {
-      bestRate = rate;
-    }
-  }
-  if (bestRate === null) {
-    throw new Error("Received an empty array of rates!");
-  }
-  return bestRate;
-}
-
-/**
- * @param {ElectricityPlan} plan
- * @param {UsageEntry} entry
- * @returns {number} cost in millicents
- */
-export function calculateHourlyUsageEntryCost(entry, plan) {
-  const { dayOfWeek, hour } = entry.startDate;
-  const applicableRates = plan.rates.filter((rate) => {
-    /** @type {number[]} */
-    const days = rate.days;
-    return (
-      days.includes(dayOfWeek) &&
-      rate.hours.some(({ start, end }) => start <= hour && hour < end)
-    );
-  });
-  // Make sure that there aren't any overlapping non-special rates
-  const nonSpecialRates = applicableRates.filter((rate) => !rate.special);
-  if (nonSpecialRates.length !== 1) {
-    let errorMsg = `(Plan: ${plan.id}) There must only be one applicable rate, but ${nonSpecialRates.length} were found for entry with start date ${entry.startDate}`;
-    if (nonSpecialRates.length > 1) {
-      const rateNames = nonSpecialRates
-        .map((rate) => rate.name ?? "unnamed")
-        .join(", ");
-      errorMsg += `: (${rateNames})`;
-    }
-    throw new Error(errorMsg);
-  }
-  const bestRate = getBestRate(applicableRates);
-  const variableCost = Math.round(bestRate.millicents * entry.usage);
-  const fixedCost = plan.dailyMillicents / entry.startDate.hoursInDay;
-  return variableCost + fixedCost;
-}
-
-/**
- * Returns the number of days covered by the usage entries.
- *
- * @param {IntervalType} intervalType
- * @param {UsageEntry[]} usage entries in chronological order
- */
-function getTotalDays(intervalType, usage) {
-  const startDate = usage.at(0)?.startDate;
-  const endDate = usage.at(-1)?.startDate;
-  if (startDate == null || endDate == null) {
-    throw new Error("At least one usage entry is required");
-  }
-  /** @type {Temporal.Duration} */
-  let intervalDuration;
-  if (intervalType === "hourly") {
-    intervalDuration = Temporal.Duration.from({ hours: 1 });
-  } else if (intervalType === "daily") {
-    intervalDuration = Temporal.Duration.from({ days: 1 });
-  } else if (intervalType === "monthly") {
-    intervalDuration = Temporal.Duration.from({ months: 1 });
-  } else {
-    throw new Error(`Unsupported intervalType: "${intervalType}"`);
-  }
-  return startDate.until(endDate).add(intervalDuration).total("days");
-}
+/** @import { UsageEntry, UsageEntries, GasUsage, IntervalType, UsageDetails, PlanUsageCostBreakdown } from './types.js' */
 
 /**
  * @param {UsageDetails} usageDetails
  * @param {ElectricityPlan} plan
- * @param {boolean} hypothetically use usageFraction on rates if present
- * @returns {number} cost in millicents
+ * @returns {PlanUsageCostBreakdown} cost & usage breakdown
  */
-export function calculateElectricityPlanCost(
-  { intervalType, usage },
-  plan,
-  hypothetically = false
-) {
-  if (hypothetically && plan.rates.some((rate) => rate.usageFraction != null)) {
-    const totalUsage = usage.reduce((acc, entry) => acc + entry.usage, 0);
-    const variableCost = plan.rates.reduce((acc, rate) => {
-      if (rate.usageFraction == null) {
-        throw new Error("Undefined usageFraction for rate: " + pp(rate));
-      }
-      return Math.round(
-        acc + totalUsage * rate.usageFraction * rate.millicents
-      );
-    }, 0);
-    const fixedCost = getTotalDays(intervalType, usage) * plan.dailyMillicents;
-    return Math.round(fixedCost + variableCost);
+export function calculatePlanUsageCostBreakdown(usageDetails, plan) {
+  const { variableCost, rateBreakdown } = getVariableCost(usageDetails, plan);
+  const fixedCost = Math.round(usageDetails.totalDays * plan.dailyMillicents);
+  const totalCost = fixedCost + variableCost;
+  return {
+    usageDetails,
+    plan,
+    totalCost,
+    fixedCost,
+    variableCost,
+    rateBreakdown,
+  };
+}
+
+/**
+ *
+ * @param {UsageDetails} usageDetails
+ * @param {ElectricityPlan} plan
+ * @returns {Pick<PlanUsageCostBreakdown, 'variableCost' | 'rateBreakdown'>}
+ */
+function getVariableCost(usageDetails, plan) {
+  if (plan.rates.length === 1) {
+    const rate = plan.rates[0];
+    const cost = Math.round(usageDetails.totalUsage * rate.millicents);
+    return {
+      rateBreakdown: { [rate.name]: { usage: usageDetails.totalUsage, cost } },
+      variableCost: cost,
+    };
   }
-  if (intervalType !== "hourly") {
-    throw new Error(
-      `Unsupported intervalType: "${intervalType}" (must be "hourly")`
-    );
+  const rateUsage = Object.fromEntries(
+    plan.rates.map((rate) => [rate.name, 0])
+  );
+  for (const day of daily) {
+    for (let hour = 0; hour < 24; hour++) {
+      const rate = getRateForTime(plan, day, hour);
+      rateUsage[rate.name] += usageDetails.usageByHourOfWeek[day][hour];
+    }
   }
-  const cost = usage.reduce(
-    (acc, entry) => acc + calculateHourlyUsageEntryCost(entry, plan),
+  const rateBreakdown = Object.fromEntries(
+    plan.rates.map((rate) => {
+      const usage = rateUsage[rate.name];
+      return [
+        rate.name,
+        {
+          usage: Math.round(usage),
+          cost: Math.round(rate.millicents * usage),
+        },
+      ];
+    })
+  );
+  const variableCost = plan.rates.reduce(
+    (acc, rate) => acc + rateBreakdown[rate.name].cost,
     0
   );
-  return cost;
+  return { rateBreakdown, variableCost };
 }
 
 /**
@@ -163,12 +96,10 @@ export function calculateGasPlanCost(gasUsage, plan) {
  */
 export function comparePlansIndividually(usage) {
   let plansByType = {};
-  const electricityUsage = usage.electricity;
-  if (electricityUsage != null) {
-    plansByType.electricity = ElectricityPlans.map((plan) => ({
-      plan,
-      cost: calculateElectricityPlanCost(electricityUsage, plan, true),
-    })).sort((a, b) => a.cost - b.cost);
+  if (usage.electricity != null) {
+    plansByType.electricity = ElectricityPlans.map((plan) =>
+      calculatePlanUsageCostBreakdown(usage.electricity, plan)
+    ).sort((a, b) => a.totalCost - b.totalCost);
   }
   const gasUsage = usage.gas;
   if (gasUsage) {
@@ -194,7 +125,7 @@ export function comparePlansIndividually(usage) {
  * @typedef PlanSelection
  * @type {object}
  * @property {string} name
- * @property {{plan: ElectricityPlan, cost: number}} electricity
+ * @property {{plan: ElectricityPlan, cost: PlanUsageCostBreakdown}} electricity
  * @property {{plan: PipedGasPlan, cost: number}} gas
  * @property {{plan: InternetPlan, cost: number}} internet
  * @property {number} total total cost
@@ -218,27 +149,21 @@ function selectBestPlan(name, plans, usage) {
   const bestElectricityPlan = plans.electricity
     .map((plan) => ({
       plan,
-      cost: calculateElectricityPlanCost(usage.electricity, plan, true),
+      cost: calculatePlanUsageCostBreakdown(usage.electricity, plan),
     }))
-    .reduce((min, curr) => (curr.cost < min.cost ? curr : min), {
-      cost: Number.MAX_SAFE_INTEGER,
-      plan: plans.electricity[0],
-    });
+    .reduce((min, curr) =>
+      curr.cost.totalCost < min.cost.totalCost ? curr : min
+    );
 
   const bestGasPlan = plans.gas
     .map((plan) => ({
       plan,
       cost: calculateGasPlanCost(usage.gas, plan),
     }))
-    .reduce((min, curr) => (curr.cost < min.cost ? curr : min), {
-      cost: Number.MAX_SAFE_INTEGER,
-      plan: plans.gas[0],
-    });
+    .reduce((min, curr) => (curr.cost < min.cost ? curr : min));
 
-  const bestInternetPlan = plans.internet.reduce(
-    (min, curr) =>
-      curr.monthlyMillicents < min.monthlyMillicents ? curr : min,
-    plans.internet[0]
+  const bestInternetPlan = plans.internet.reduce((min, curr) =>
+    curr.monthlyMillicents < min.monthlyMillicents ? curr : min
   );
   return {
     name,
@@ -249,7 +174,7 @@ function selectBestPlan(name, plans, usage) {
       cost: bestInternetPlan.monthlyMillicents,
     },
     total:
-      bestElectricityPlan.cost +
+      bestElectricityPlan.cost.totalCost +
       bestGasPlan.cost +
       bestInternetPlan.monthlyMillicents,
   };
@@ -286,14 +211,11 @@ function selectBestBundledPlan(name, providerPlans, bestUnbundled, usage) {
     .map((selection) => ({
       ...selection,
       total:
-        selection.electricity.cost +
+        selection.electricity.cost.totalCost +
         selection.gas.cost +
         selection.internet.cost,
     }))
-    .reduce((min, curr) => (curr.total < min.total ? curr : min), {
-      ...selectionsByPlan[0],
-      total: Number.MAX_SAFE_INTEGER,
-    });
+    .reduce((min, curr) => (curr.total < min.total ? curr : min));
   return bestBundledPlan;
 }
 

@@ -21,12 +21,14 @@ const rates = {
     hours: [hours(9, 17)],
     millicents: 0,
     special: true,
+    name: "Good Weekends",
   },
   goodNights: {
     days: daily,
     hours: [hours(21, 24)],
     millicents: 0,
     special: true,
+    name: "Good Nights",
   },
 };
 

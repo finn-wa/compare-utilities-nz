@@ -38,8 +38,8 @@ export const allDay = [hours(0, 24)];
  * @param {number} millicents price per kwH
  * @returns {Rate}
  */
-export function dailyRate(millicents) {
-  return { days: daily, hours: allDay, millicents };
+export function dailyRate(millicents, name = "Daily") {
+  return { days: daily, hours: allDay, millicents, name };
 }
 
 /**
@@ -62,12 +62,22 @@ export function writeJson(jsonObject, outputPath) {
 }
 
 /**
- * Adds the `type: "electricity"` property
+ * Adds the `type: "electricity"` property and validates rates.
  * @param {Omit<ElectricityPlan, 'type'>} plan
  * @returns {ElectricityPlan}
  */
 export function electricityPlan(plan) {
-  return { type: "electricity", ...plan };
+  /** @type {ElectricityPlan} */
+  const planWithType = { type: "electricity", ...plan };
+  for (const day of daily) {
+    for (const hour of Array.from({ length: 24 }, (_, i) => i)) {
+      if (getRateForTime(planWithType, day, hour) == null) {
+        // getRateForTime will throw a better error
+        throw new Error("No rate found!");
+      }
+    }
+  }
+  return planWithType;
 }
 
 /**
@@ -120,4 +130,38 @@ export const requireNonEmpty = (arr) => {
  */
 export function needsBundle(plan) {
   return plan.bundle.length > 0;
+}
+
+/**
+ * @param {ElectricityPlan} plan
+ * @param {Day} day
+ * @param {number} hour
+ */
+export function getRateForTime(plan, day, hour) {
+  const applicableRates = plan.rates.filter((rate) => {
+    /** @type {number[]} */
+    const days = rate.days;
+    return (
+      days.includes(day) &&
+      rate.hours.some(({ start, end }) => start <= hour && hour < end)
+    );
+  });
+  if (applicableRates.length === 1) {
+    return applicableRates[0];
+  }
+  // Make sure that there aren't any overlapping non-special rates
+  const nonSpecialRates = applicableRates.filter((rate) => !rate.special);
+  if (nonSpecialRates.length !== 1) {
+    let errorMsg = `(Plan: ${plan.id}) There must only be one applicable rate, but ${nonSpecialRates.length} were found for day ${day} & hour ${hour}`;
+    if (nonSpecialRates.length > 1) {
+      const rateNames = nonSpecialRates
+        .map((rate) => rate.name ?? "unnamed")
+        .join(", ");
+      errorMsg += `: (${rateNames})`;
+    }
+    throw new Error(errorMsg);
+  }
+  return applicableRates.reduce((min, rate) =>
+    rate.millicents < min.millicents ? rate : min
+  );
 }

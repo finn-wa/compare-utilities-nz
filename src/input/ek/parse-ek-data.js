@@ -2,13 +2,13 @@ import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
 import { Temporal } from "temporal-polyfill";
 import { NZT } from "../utils.js";
-/** @import { UsageDetails, UsageEntry } from '../../calculations/cost.js' */
+/** @import { UsageEntries, UsageEntry } from '../../calculations/types.js' */
 
 /**
  * Reads Electric Kiwi electricity consumption JSON files from the input folder and outputs a formatted usage object.
  *
  * @param {string} inputFolder
- * @returns {UsageDetails}
+ * @returns {UsageEntries}
  */
 export function getElectricKiwiConsumption(inputFolder = "./data/ek") {
   const consumptionData = parseConsumptionFiles(inputFolder);

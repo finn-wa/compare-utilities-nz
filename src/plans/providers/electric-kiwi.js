@@ -26,17 +26,17 @@ const hourOfPower = {
 const moveMasterSchedule = {
   peak,
   shoulderWeekdays: {
-    name: "Off-peak shoulder (weekdays)",
+    name: "Off-Peak Shoulder",
     days: weekdays,
     hours: [hours(9, 17), hours(21, 23)],
   },
   shoulderWeekends: {
-    name: "Off-peak shoulder (weekends)",
+    name: "Off-Peak Shoulder",
     days: weekends,
     hours: [hours(7, 23)],
   },
   offPeakNight: {
-    name: "Off-peak night",
+    name: "Off-Peak Night",
     days: daily,
     hours: [hours(23, 24), hours(0, 7)],
   },
@@ -45,12 +45,12 @@ const moveMasterSchedule = {
 const standardSchedule = {
   peak,
   offPeakWeekdays: {
-    name: "Off-peak (weekdays)",
+    name: "Off-Peak",
     days: weekdays,
     hours: [hours(9, 17), hours(21, 24), hours(0, 7)],
   },
   offPeakWeekends: {
-    name: "Off-peak (weekends)",
+    name: "Off-Peak",
     days: weekends,
     hours: allDay,
   },

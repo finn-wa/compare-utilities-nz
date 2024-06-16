@@ -31,14 +31,17 @@ export const flickFlatStandard = electricityPlan({
 
 const rates = {
   peak: {
+    name: "Peak",
     days: weekdays,
     hours: [hours(7, 11), hours(17, 21)],
   },
   offPeakWeekdays: {
+    name: "Off-Peak",
     days: weekdays,
     hours: [hours(0, 7), hours(11, 17), hours(21, 24)],
   },
   offPeakWeekends: {
+    name: "Off-Peak",
     days: weekends,
     hours: allDay,
   },

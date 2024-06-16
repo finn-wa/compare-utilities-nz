@@ -2,10 +2,7 @@ import assert from "node:assert";
 import test, { describe } from "node:test";
 import { Temporal } from "temporal-polyfill";
 import { dailyRate, electricityPlan, mcTo$ } from "../plans/utils.js";
-import {
-  calculateElectricityPlanCost,
-  calculateHourlyUsageEntryCost,
-} from "./cost.js";
+import { calculateElectricityPlanCost, getRate } from "./cost.js";
 import { getFrankElectricityUsage } from "../input/frank/parse-frank-data.js";
 
 const dailyRatePlan = electricityPlan({
@@ -20,7 +17,7 @@ const dailyRatePlan = electricityPlan({
 
 describe("calculateHourlyUsageEntryCost", () => {
   test("with daily rate", () => {
-    const cost = calculateHourlyUsageEntryCost(
+    const cost = getRate(
       {
         startDate: Temporal.ZonedDateTime.from(
           "2024-04-20T00:00:00+12:00[Pacific/Auckland]"

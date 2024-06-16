@@ -21,7 +21,7 @@
  *    instead of another rate in the same time-slot
  * @property {number} [usageFraction] the fraction of total energy used that
  *    should be billed at this rate when doing a hypothetical calculation
- * @property {string} [name] Optional name for this rate
+ * @property {string} name Name for this rate
  */
 /**
  * @typedef {('electricity'|'gas'|'internet')} ServiceType
