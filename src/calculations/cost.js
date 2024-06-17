@@ -55,19 +55,24 @@ function getVariableCost(usageDetails, plan) {
     }
   }
   const rateBreakdown = Object.fromEntries(
-    plan.rates.map((rate) => {
-      const usage = rateUsage[rate.name];
+    Object.entries(rateUsage).map(([rateName, usage]) => {
+      // TODO: remove weekend/weekday rates as it has caused a bad bug here
+      // where they were tallied twice. all rates should have an array of periods
+      const rate = plan.rates.find((rate) => rate.name === rateName);
+      if (rate == null) {
+        throw new Error("typescript was right :O");
+      }
       return [
-        rate.name,
+        rateName,
         {
-          usage: Math.round(usage),
+          usage,
           cost: Math.round(rate.millicents * usage),
         },
       ];
     })
   );
-  const variableCost = plan.rates.reduce(
-    (acc, rate) => acc + rateBreakdown[rate.name].cost,
+  const variableCost = Object.values(rateBreakdown).reduce(
+    (acc, rate) => acc + rate.cost,
     0
   );
   return { rateBreakdown, variableCost };

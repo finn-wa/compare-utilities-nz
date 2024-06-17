@@ -1,26 +1,31 @@
+import { Temporal } from "temporal-polyfill";
 import {
   calculatePlanUsageCostBreakdown,
   comparePlanCombinations,
   comparePlansIndividually,
 } from "./calculations/cost.js";
 import { calculateUsageDetails } from "./calculations/usage.js";
+import { getElectricKiwiConsumption } from "./input/ek/parse-ek-data.js";
 import {
   getFrankElectricityUsage,
   getFrankGasUsage,
 } from "./input/frank/parse-frank-data.js";
 import { needsBundle } from "./plans/utils.js";
+import {
+  electricKiwiMoveMasterLowUser,
+  electricKiwiMoveMasterStandardUser,
+} from "./plans/providers/electric-kiwi.js";
 /** @import {UtilityUsage} from "./calculations/cost.js" */
-/** @import {PlanUsageCostBreakdown} from "./calculations/types.js" */
+/** @import {PlanUsageCostBreakdown, UsageDetails} from "./calculations/types.js" */
 /** @import {Plan} from './plans/types.js' */
 
-const eletricityUsage = getFrankElectricityUsage();
+const electricityUsage = getFrankElectricityUsage();
 const usage = {
-  electricity: calculateUsageDetails(eletricityUsage.usage),
+  electricity: calculateUsageDetails(electricityUsage.usage),
   gas: getFrankGasUsage(),
 };
 printIndividualComparison(usage);
 printCombinedComparison(usage);
-
 /**
  * @param {UtilityUsage} usage
  */
@@ -83,6 +88,34 @@ function printIndividualComparison(usage) {
       }))
     );
   }
+}
+
+/**
+ *
+ * @param {UsageDetails} electricityUsage
+ */
+function printElectricityUsage(electricityUsage) {
+  console.log("Total usage:");
+  console.table({
+    days: electricityUsage.totalDays,
+    usage: electricityUsage.totalUsage,
+  });
+  console.log("Usage by hour: ");
+  console.table(
+    electricityUsage.usageByHourOfDay.map((kw) =>
+      pc(kw, electricityUsage.totalUsage)
+    )
+  );
+  console.log("Usage by day: ");
+  console.table(
+    Object.entries(electricityUsage.usageByHourOfWeek).map(([day, hourly]) => ({
+      day,
+      usage: pc(
+        hourly.reduce((acc, curr) => acc + curr),
+        electricityUsage.totalUsage
+      ),
+    }))
+  );
 }
 
 /**
